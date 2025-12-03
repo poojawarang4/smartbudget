@@ -1,12 +1,21 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Sidebar } from './layout/sidebar/sidebar';
+import { Header } from './layout/header/header';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrls: ['./app.scss'],
+    imports: [
+    RouterOutlet,
+    Sidebar,
+    Header
+
+    
+  ]
 })
 export class App {
-  protected readonly title = signal('smartbudget');
+  // protected readonly title = signal('smartbudget');
 }

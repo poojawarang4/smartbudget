@@ -1,0 +1,159 @@
+/* HEADER BAR */
+.header {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  align-items: center;
+  background: #e7f9ee;
+  padding: 12px 20px;
+  flex-wrap: wrap;
+  /* responsive */
+}
+
+.month-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  /* mobile support */
+}
+
+.arrow {
+  font-size: 20px;
+  cursor: pointer;
+  color: #2ecc71;
+  padding: 8px;
+  user-select: none;
+}
+
+.month-text {
+  font-size: 22px;
+  font-weight: bold;
+  color: #222;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* POPOVER SECTION */
+.popover-wrapper {
+  position: absolute;
+  top: 60px;
+  /* position below the header */
+  right: 10px;
+  /* align to right side */
+  z-index: 9999;
+  width: auto;
+  padding: 0;
+}
+
+.month-popover {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: fit-content;
+  max-width: 100%;
+  /* prevent overflow */
+  padding: 10px;
+}
+
+/* WRAPPER FOR MONTH LIST + ARROWS */
+.month-list-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* LEFT/RIGHT ARROWS IN POPOVER */
+.arrow-list {
+  font-size: 24px;
+  cursor: pointer;
+  color: #2ecc71;
+  padding: 10px;
+  user-select: none;
+}
+
+/* MONTH LIST (SCROLLABLE) */
+.month-list {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-snap-type: x mandatory;
+  max-width: 75vw;
+  /* responsive width */
+}
+
+/* SINGLE MONTH ITEM */
+.month-item {
+  padding: 10px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 70px;
+  scroll-snap-align: center;
+}
+
+.month-item.active {
+  background: #36c96e;
+  color: white;
+  border-color: #36c96e;
+}
+
+.year-small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ---------------------------- */
+/* 📱 MOBILE RESPONSIVE RULES  */
+/* ---------------------------- */
+
+@media (max-width: 768px) {
+
+  .month-text {
+    font-size: 18px;
+  }
+
+  .month-list {
+    max-width: 85vw;
+    /* more scroll space */
+  }
+
+  .month-item {
+    min-width: 65px;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .header {
+    flex-direction: column;
+    /* stack layout */
+    align-items: flex-start;
+  }
+
+  .month-switch {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .month-text {
+    font-size: 16px;
+  }
+
+  .arrow {
+    font-size: 18px;
+  }
+
+  .month-list {
+    max-width: 90vw;
+  }
+
+  .month-item {
+    min-width: 60px;
+    padding: 8px;
+  }
+}
