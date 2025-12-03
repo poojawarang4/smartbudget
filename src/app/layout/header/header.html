@@ -1,0 +1,44 @@
+<div class="header">
+  <h2>Smartbudget</h2>
+
+  <div class="month-switch">
+    <span class="arrow" (click)="goToPreviousMonth()">&#10094;</span>
+
+    <div class="month-text" (click)="toggleMonthPopover()">
+      {{ months[selectedMonthIndex].name }} {{ selectedYear }}
+    </div>
+
+    <span class="arrow" (click)="goToNextMonth()">&#10095;</span>
+  </div>
+</div>
+
+<!-- MONTH POPOVER -->
+<!-- MONTH POPOVER -->
+<div class="popover-wrapper" *ngIf="isMonthPopoverOpen">
+  <div class="month-popover">
+
+    <!-- MONTH LIST WITH ARROWS -->
+    <div class="month-list-wrapper">
+
+      <!-- LEFT ARROW -->
+      <span class="arrow-list" (click)="goToPreviousMonth()">&#10094;</span>
+
+      <!-- 9 MONTH CARDS -->
+      <div class="month-list">
+        <div class="month-item"
+             *ngFor="let m of visibleMonths"
+             [class.active]="m.isSelected"
+             (click)="selectMonth(m.index, m.year)">
+          <div>{{ m.name }}</div>
+          <div class="year-small">{{ m.year }}</div>
+        </div>
+      </div>
+
+      <!-- RIGHT ARROW -->
+      <span class="arrow-list" (click)="goToNextMonth()">&#10095;</span>
+
+    </div>
+
+  </div>
+</div>
+
