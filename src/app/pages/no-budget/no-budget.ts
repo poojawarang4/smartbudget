@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { MonthService } from '../../../month.service';
 
 @Component({
   selector: 'app-no-budget',
@@ -8,8 +9,15 @@ import { Router } from '@angular/router';
   styleUrl: './no-budget.scss',
 })
 export class NoBudget {
+selectedMonth: string = '';
+   constructor(private router: Router,private monthService: MonthService) {}
 
-   constructor(private router: Router) {}
+   ngOnInit() {
+  this.monthService.selectedMonth$.subscribe(month => {
+    this.selectedMonth = month;
+  });
+}
+
    
   goToBudgetPage() {
     this.router.navigate(['/budget']);

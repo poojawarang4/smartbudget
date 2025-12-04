@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { MonthService } from '../../../month.service';
 
 @Component({
   selector: 'app-header',
@@ -10,18 +11,18 @@ import { Component } from '@angular/core';
 export class Header {
 
   months = [
-    { index: 0, name: 'Jan' },
-    { index: 1, name: 'Feb' },
-    { index: 2, name: 'Mar' },
-    { index: 3, name: 'Apr' },
+    { index: 0, name: 'January' },
+    { index: 1, name: 'February' },
+    { index: 2, name: 'March' },
+    { index: 3, name: 'April' },
     { index: 4, name: 'May' },
-    { index: 5, name: 'Jun' },
-    { index: 6, name: 'Jul' },
-    { index: 7, name: 'Aug' },
-    { index: 8, name: 'Sep' },
-    { index: 9, name: 'Oct' },
-    { index: 10, name: 'Nov' },
-    { index: 11, name: 'Dec' }
+    { index: 5, name: 'June' },
+    { index: 6, name: 'July' },
+    { index: 7, name: 'August' },
+    { index: 8, name: 'September' },
+    { index: 9, name: 'October' },
+    { index: 10, name: 'November' },
+    { index: 11, name: 'December' }
   ];
 
   selectedMonthIndex = new Date().getMonth();
@@ -35,6 +36,7 @@ export class Header {
   ngOnInit() {
     this.updateVisibleMonths();
   }
+  constructor(private monthService: MonthService) { }
 
   toggleMonthPopover() {
     this.isMonthPopoverOpen = !this.isMonthPopoverOpen;
@@ -81,8 +83,12 @@ export class Header {
   selectMonth(index: number, year: number) {
     this.selectedMonthIndex = index;
     this.selectedYear = year;
-    this.updateVisibleMonths();
+    const selectedMonthName = this.months[index].name;
+    this.monthService.updateMonth(selectedMonthName);
+
     this.isMonthPopoverOpen = false;
+    // this.updateVisibleMonths();
+    // this.isMonthPopoverOpen = false;
   }
 
   goToPreviousMonth() {
