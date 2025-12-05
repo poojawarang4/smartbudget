@@ -4,10 +4,11 @@ import { Component, OnInit } from '@angular/core';
 import { ChartOptions, ChartType } from 'chart.js';
 import { NoBudget } from '../no-budget/no-budget';
 import { MonthService } from '../../../month.service';
+import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
 
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, NoBudget],
+  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
@@ -34,7 +35,7 @@ export class Budget implements OnInit {
   budgetExistsForMonth = true;
   selectedMonth = '';
   expenses: any[] = [];
-
+  showResetPopup = false;
   income = [
     { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
     { name: 'Salary 2', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
@@ -42,7 +43,6 @@ export class Budget implements OnInit {
     { name: 'Investment Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
     { name: 'Other Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
   ];
-
 
   housing = [
     { name: 'Mortgage', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
@@ -294,7 +294,6 @@ export class Budget implements OnInit {
         labels.push(this.pieChartLabels[index]);
       }
     });
-
     this.pieChartData = data;
     this.pieChartLabels = labels;
     this.pieChartColors = [{ backgroundColor: colors.slice(0, data.length) }];
@@ -303,11 +302,10 @@ export class Budget implements OnInit {
     const month = (this.selectedMonthIndex + 1).toString().padStart(2, '0');
     return `${this.selectedYear}-${month}`;
   }
+
   loadBudgetForMonth(forceCreate: boolean = false) {
     const key = this.getStorageKey();
-
     const savedData = localStorage.getItem(key);
-    console.log("savedData", savedData)
     if (savedData) {
       const budget = JSON.parse(savedData);
       this.income = budget.income;
@@ -339,7 +337,6 @@ export class Budget implements OnInit {
         editPlanned: false,
         editReceived: false
       }));
-
     this.income = resetArray(this.income);
     this.savings = resetArray(this.savings);
     this.giving = resetArray(this.giving);
@@ -359,11 +356,11 @@ export class Budget implements OnInit {
     this.budgetExistsForMonth = true; // show budget page
     this.saveBudget(); // save blank version
   }
+
   resetBudgetValues() {
     this.income = [
       { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
     ];
-
     this.housing = this.housing.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
     this.tranportation = this.tranportation.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
     this.food = this.food.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
@@ -375,13 +372,11 @@ export class Budget implements OnInit {
     this.loan = this.loan.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
     this.entertainment = this.entertainment.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
     this.childcare = this.childcare.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-
     this.amountLeft = 0;
   }
 
   saveBudget() {
     const key = this.getStorageKey();
-
     const data = {
       income: this.income,
       savings: this.savings,
@@ -396,7 +391,6 @@ export class Budget implements OnInit {
       entertainment: this.entertainment,
       childcare: this.childcare
     };
-
     localStorage.setItem(key, JSON.stringify(data));
   }
 
@@ -405,18 +399,28 @@ export class Budget implements OnInit {
   }
 
   copyLatestBudgetForMonth() {
-    const latest = this.findLatestBudget();
-
-    if (!latest) {
-      console.warn("No previous budget found.");
-      return;
+    const currentMonthIndex = this.selectedMonthIndex;
+    const currentYear = this.selectedYear;
+    // Start from previous month, go backwards
+    let year = currentYear;
+    let month = currentMonthIndex - 1;
+    while (year >= 2020) { // or any reasonable lower bound
+      if (month < 0) {
+        month = 11;
+        year--;
+        if (year < 2020) break;
+      }
+      const key = `budget-${year}-${month}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const currentKey = this.getStorageKey();
+        localStorage.setItem(currentKey, saved); // copy latest budget
+        this.loadBudgetForMonth(); // reload copied data
+        return;
+      }
+      month--;
     }
-
-    const currentKey = this.getStorageKey();
-    localStorage.setItem(currentKey, JSON.stringify(latest));
-
-    this.budgetExistsForMonth = true;
-    this.loadBudgetForMonth();
+    console.warn("No previous budget found to copy.");
   }
 
   findLatestBudget(): any {
@@ -430,4 +434,38 @@ export class Budget implements OnInit {
     return null;
   }
 
+  openResetPopup() {
+    this.showResetPopup = true;
+  }
+
+  resetAllAmountsToZero() {
+    this.showResetPopup = false;
+    const allGroups = [
+      this.income, this.savings, this.giving, this.housing, this.tranportation,
+      this.food, this.personal, this.health, this.insurance, this.loan,
+      this.entertainment, this.childcare
+    ];
+    allGroups.forEach(group => {
+      group.forEach(item => {
+        item.planned = '0.00';
+      });
+    });
+    this.calculateTotals();
+    this.saveBudget();
+    alert("All planned amounts have been reset to ₹0.");
+  }
+
+  copyLastMonthBudget() {
+    const lastMonthIndex = this.selectedMonthIndex === 0 ? 11 : this.selectedMonthIndex - 1;
+    const lastMonthYear = this.selectedMonthIndex === 0 ? this.selectedYear - 1 : this.selectedYear;
+    const lastKey = `budget-${lastMonthYear}-${lastMonthIndex}`;
+    const lastData = localStorage.getItem(lastKey);
+    if (!lastData) {
+      console.warn("No previous budget found.");
+      return;
+    }
+    const currentKey = this.getStorageKey();
+    localStorage.setItem(currentKey, lastData);
+    this.loadBudgetForMonth(); // reload the copied data
+  }
 }

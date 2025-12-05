@@ -505,7 +505,11 @@
             <div><span class="dot blue"></span> Entertainment</div>
             <div><span class="dot pista"></span> Child Care</div>
           </div>
-          <button class="reset-btn">⟳ Reset Budget</button>
+          <button class="reset-btn" (click)="openResetPopup()">⟳ Reset Budget</button>
+
+          <app-reset-budget-popup *ngIf="showResetPopup" (closePopup)="showResetPopup = false"
+            (makeZero)="resetAllAmountsToZero()" (copyLast)="copyLastMonthBudget()">
+          </app-reset-budget-popup>
         </div>
       </div>
       <!-- POPUP EDIT BOX -->
