@@ -2,15 +2,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import { ChartOptions, ChartType } from 'chart.js';
+import { NoBudget } from '../no-budget/no-budget';
+import { MonthService } from '../../../month.service';
 
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NoBudget],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
 })
-export class Budget implements OnInit{
+export class Budget implements OnInit {
   isOpen = false;
   isOpeni = false;
   isExp = false;
@@ -27,7 +29,11 @@ export class Budget implements OnInit{
   allCategories: any[][] = [];
   hasEdited = false;
   hasEnteredAmount = false;
-
+  selectedYear = new Date().getFullYear();
+  selectedMonthIndex = new Date().getMonth(); // 0-11
+  budgetExistsForMonth = true;
+  selectedMonth = '';
+  expenses: any[] = [];
 
   income = [
     { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
@@ -86,15 +92,24 @@ export class Budget implements OnInit{
   ];
   public pieChartOptions: ChartOptions = { responsive: true };
   public pieChartLabels: string[] = [
-    'Savings', 'Giving', 'Housing', 'Transportation', 'Food', 
+    'Savings', 'Giving', 'Housing', 'Transportation', 'Food',
     'Personal', 'Health', 'Insurance', 'Loan Repayment', 'Entertainment', 'Child Care'
   ];
   public pieChartData: number[] = [];
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
+  constructor(private monthService: MonthService) {
 
+  }
 
   ngOnInit() {
+    this.monthService.selectedMonth$.subscribe(monthName => {
+      this.selectedMonthIndex = this.getMonthIndexFromName(monthName);
+      this.loadBudgetForMonth();
+    });
+
+    // Load initial month
+    this.loadBudgetForMonth();
     this.allCategories = [
       this.savings || [],
       this.giving || [],
@@ -108,8 +123,43 @@ export class Budget implements OnInit{
       this.entertainment || [],
       this.childcare || []
     ];
- this.updateChart();
+    this.updateChart();
   }
+  startPlanningForNewMonth() {
+    this.resetToZeroValues();
+    this.budgetExistsForMonth = true;
+    this.saveBudget();
+  }
+  startPlanningForMonth() {
+    this.loadBudgetForMonth(true);
+  }
+
+  getMonthIndexFromName(monthName: string): number {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months.indexOf(monthName);
+  }
+
+  onMonthChanged(event: any) {
+    this.selectedMonthIndex = event.monthIndex;
+    this.selectedYear = event.year;
+
+    this.loadBudgetForMonth();
+  }
+  getMonthName(index: number) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[index];
+  }
+
+  getStorageKey() {
+    return `budget-${this.selectedYear}-${this.selectedMonthIndex}`;
+  }
+
   toggle() {
     this.isOpen = !this.isOpen;
   }
@@ -150,7 +200,7 @@ export class Budget implements OnInit{
 
     // 3. Balance
     this.amountLeft = this.totalIncome - this.totalPlannedExpenses;
-this.updateChart();
+    this.updateChart();
     // 4. Budget Status
     if (this.amountLeft > 0) {
       this.budgetStatus = "Amount left to budget";
@@ -192,11 +242,10 @@ this.updateChart();
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  // Save value and close input
-  finishEdit(item: any, field: 'planned' | 'received') {
-    item[field] = Number(item[field] || 0).toFixed(2);
-    item[`edit${field.charAt(0).toUpperCase() + field.slice(1)}`] = false;
-    this.calculateTotals();
+  finishEdit(item: any, type: string) {
+    item["edit" + this.capitalize(type)] = false;
+    this.onAmountChange();
+    this.saveBudget();  // ← Save month-wise
   }
 
   shouldShowSummaryBox(): boolean {
@@ -220,7 +269,7 @@ this.updateChart();
     this.hasEnteredAmount = true;
     this.calculateTotals(); // if you have a method that updates amountLeft
   }
-updateChart() {
+  updateChart() {
     // If nothing entered, show single color
     const hasData = this.allCategories.flat().some(i => Number(i.planned) > 0);
     if (!hasData) {
@@ -250,4 +299,135 @@ updateChart() {
     this.pieChartLabels = labels;
     this.pieChartColors = [{ backgroundColor: colors.slice(0, data.length) }];
   }
+  getMonthKey(): string {
+    const month = (this.selectedMonthIndex + 1).toString().padStart(2, '0');
+    return `${this.selectedYear}-${month}`;
+  }
+  loadBudgetForMonth(forceCreate: boolean = false) {
+    const key = this.getStorageKey();
+
+    const savedData = localStorage.getItem(key);
+    console.log("savedData", savedData)
+    if (savedData) {
+      const budget = JSON.parse(savedData);
+      this.income = budget.income;
+      this.housing = budget.housing;
+      this.food = budget.food;
+      this.tranportation = budget.tranportation;
+      this.insurance = budget.insurance;
+      this.savings = budget.savings;
+      this.giving = budget.giving;
+      this.personal = budget.personal;
+      this.health = budget.health;
+      this.loan = budget.loan;
+      this.entertainment = budget.entertainment;
+      this.childcare = budget.childcare;
+      this.budgetExistsForMonth = true;
+    } else {
+      this.resetToZeroValues();
+      this.budgetExistsForMonth = forceCreate ? true : false;
+    }
+    this.onAmountChange();
+  }
+
+  resetToZeroValues() {
+    const resetArray = (arr: any[]) =>
+      arr.map(item => ({
+        ...item,
+        planned: '0.00',
+        received: '0.00',
+        editPlanned: false,
+        editReceived: false
+      }));
+
+    this.income = resetArray(this.income);
+    this.savings = resetArray(this.savings);
+    this.giving = resetArray(this.giving);
+    this.housing = resetArray(this.housing);
+    this.tranportation = resetArray(this.tranportation);
+    this.food = resetArray(this.food);
+    this.personal = resetArray(this.personal);
+    this.health = resetArray(this.health);
+    this.insurance = resetArray(this.insurance);
+    this.loan = resetArray(this.loan);
+    this.entertainment = resetArray(this.entertainment);
+    this.childcare = resetArray(this.childcare);
+  }
+
+  onStartPlanning() {
+    this.resetBudgetValues();
+    this.budgetExistsForMonth = true; // show budget page
+    this.saveBudget(); // save blank version
+  }
+  resetBudgetValues() {
+    this.income = [
+      { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    ];
+
+    this.housing = this.housing.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.tranportation = this.tranportation.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.food = this.food.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.insurance = this.insurance.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.savings = this.savings.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.giving = this.giving.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.personal = this.personal.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.health = this.health.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.loan = this.loan.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.entertainment = this.entertainment.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+    this.childcare = this.childcare.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
+
+    this.amountLeft = 0;
+  }
+
+  saveBudget() {
+    const key = this.getStorageKey();
+
+    const data = {
+      income: this.income,
+      savings: this.savings,
+      giving: this.giving,
+      housing: this.housing,
+      tranportation: this.tranportation,
+      food: this.food,
+      personal: this.personal,
+      health: this.health,
+      insurance: this.insurance,
+      loan: this.loan,
+      entertainment: this.entertainment,
+      childcare: this.childcare
+    };
+
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  startNewBudget() {
+    this.budgetExistsForMonth = true;
+  }
+
+  copyLatestBudgetForMonth() {
+    const latest = this.findLatestBudget();
+
+    if (!latest) {
+      console.warn("No previous budget found.");
+      return;
+    }
+
+    const currentKey = this.getStorageKey();
+    localStorage.setItem(currentKey, JSON.stringify(latest));
+
+    this.budgetExistsForMonth = true;
+    this.loadBudgetForMonth();
+  }
+
+  findLatestBudget(): any {
+    for (let year = 2030; year >= 2020; year--) {
+      for (let m = 11; m >= 0; m--) {
+        const key = `budget-${year}-${m}`;
+        const saved = localStorage.getItem(key);
+        if (saved) return JSON.parse(saved);
+      }
+    }
+    return null;
+  }
+
 }

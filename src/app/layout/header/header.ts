@@ -98,6 +98,7 @@ export class Header {
     } else {
       this.selectedMonthIndex--;
     }
+    this.monthService.updateMonth(this.months[this.selectedMonthIndex].name);
     this.updateVisibleMonths();
   }
 
@@ -108,6 +109,7 @@ export class Header {
     } else {
       this.selectedMonthIndex++;
     }
+    this.monthService.updateMonth(this.months[this.selectedMonthIndex].name);
     this.updateVisibleMonths();
   }
 

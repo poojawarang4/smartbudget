@@ -1,0 +1,20 @@
+<div class="popup-overlay" (click)="close()"></div>
+
+<div class="popup-box">
+  <h2>How would you like to reset your budget?</h2>
+
+  <label class="option">
+    <input type="radio" name="resetOption" value="zero" [(ngModel)]="selectedOption">
+    <span>Make all planned amounts <b>$0.00</b></span>
+  </label>
+
+  <label class="option">
+    <input type="radio" name="resetOption" value="copy" [(ngModel)]="selectedOption">
+    <span><b>Replace</b> this month's budget with last month's budget</span>
+  </label>
+
+  <div class="actions">
+    <button class="cancel" (click)="close()">Cancel</button>
+    <button class="next" [disabled]="!selectedOption" (click)="confirm()">Next</button>
+  </div>
+</div>

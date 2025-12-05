@@ -1,25 +1,46 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { MonthService } from '../../../month.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-no-budget',
-  imports: [],
+  imports: [FormsModule, CommonModule],
   templateUrl: './no-budget.html',
   styleUrl: './no-budget.scss',
 })
 export class NoBudget {
-selectedMonth: string = '';
-   constructor(private router: Router,private monthService: MonthService) {}
+  selectedMonth: string = '';
+  @Output() startPlanning = new EventEmitter<void>();
+  @Output() copyLatestBudget = new EventEmitter<void>();
+  hasLatestBudget: boolean = false;
 
-   ngOnInit() {
-  this.monthService.selectedMonth$.subscribe(month => {
-    this.selectedMonth = month;
-  });
-}
+  constructor(private router: Router, private monthService: MonthService) { }
 
-   
+  ngOnInit() {
+    this.monthService.selectedMonth$.subscribe(month => {
+      this.selectedMonth = month;
+    });
+    this.hasLatestBudget = this.checkIfAnyBudgetExists();
+  }
+
   goToBudgetPage() {
+    this.startPlanning.emit();
     this.router.navigate(['/budget']);
+  }
+  copyFromLatest() {
+    this.copyLatestBudget.emit();
+    this.router.navigate(['/budget']);
+  }
+
+  checkIfAnyBudgetExists(): boolean {
+    for (let year = 2020; year <= 2030; year++) {
+      for (let m = 0; m < 12; m++) {
+        const key = `budget-${year}-${m}`;
+        if (localStorage.getItem(key)) return true;
+      }
+    }
+    return false;
   }
 }
