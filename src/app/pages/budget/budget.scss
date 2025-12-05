@@ -465,6 +465,7 @@ html {
     min-width: 50px;
   }
 }
+
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -474,6 +475,7 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
 .left-toast {
   position: fixed;
   left: 20px;
@@ -483,12 +485,59 @@ input[type=number] {
   padding: 12px 18px;
   border-radius: 6px;
   font-size: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   animation: slideIn 0.3s ease-out;
   z-index: 9999;
 }
 
 @keyframes slideIn {
-  from { transform: translateX(-50px); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.pie-chart-wrapper {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+}
+
+.pie-chart-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* category list */
+.category-list {
+  margin-top: 15px;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.percent {
+  font-weight: 600;
 }

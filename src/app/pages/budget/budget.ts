@@ -1,20 +1,31 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { ChartOptions, ChartType } from 'chart.js';
+import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { NoBudget } from '../no-budget/no-budget';
 import { MonthService } from '../../../month.service';
 import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
+import { NgChartsModule } from 'ng2-charts';
+
 
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent],
+  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent, NgChartsModule],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
+  //  providers: [
+  //   provideCharts(withDefaultRegisterables())   // ✅ REQUIRED
+  // ],
 })
 export class Budget implements OnInit {
   isOpen = false;
+  public categoryDisplay: any[] = [];
+  chartColors = [
+    '#1E90FF', '#FF4C4C', '#FFA500', '#32CD32', '#8A2BE2',
+    '#20B2AA', '#FF1493', '#A52A2A', '#708090', '#FFD700',
+    '#00CED1', '#FF7F50'
+  ];
   isOpeni = false;
   isExp = false;
   isExpand = false
@@ -90,12 +101,17 @@ export class Budget implements OnInit {
   childcare = [
     { name: 'Child Care', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
   ];
-  public pieChartOptions: ChartOptions = { responsive: true };
-  public pieChartLabels: string[] = [
-    'Savings', 'Giving', 'Housing', 'Transportation', 'Food',
-    'Personal', 'Health', 'Insurance', 'Loan Repayment', 'Entertainment', 'Child Care'
-  ];
-  public pieChartData: number[] = [];
+  public pieChartOptions: any = {
+    plugins: {
+      legend: { display: false }  // ❌ hide default legend
+    }
+  };
+  public pieChartLabels: string[] = [];
+  public pieChartData: ChartData<'pie', number[], string> = {
+    labels: [],
+    datasets: [{ data: [] }]
+  };
+
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
   constructor(private monthService: MonthService) {
@@ -123,7 +139,7 @@ export class Budget implements OnInit {
       this.entertainment || [],
       this.childcare || []
     ];
-    this.updateChart();
+    this.calculateSummaryPieChart();
   }
   startPlanningForNewMonth() {
     this.resetToZeroValues();
@@ -200,7 +216,7 @@ export class Budget implements OnInit {
 
     // 3. Balance
     this.amountLeft = this.totalIncome - this.totalPlannedExpenses;
-    this.updateChart();
+    this.calculateSummaryPieChart();
     // 4. Budget Status
     if (this.amountLeft > 0) {
       this.budgetStatus = "Amount left to budget";
@@ -245,6 +261,7 @@ export class Budget implements OnInit {
   finishEdit(item: any, type: string) {
     item["edit" + this.capitalize(type)] = false;
     this.onAmountChange();
+    this.calculateSummaryPieChart();
     this.saveBudget();  // ← Save month-wise
   }
 
@@ -269,35 +286,7 @@ export class Budget implements OnInit {
     this.hasEnteredAmount = true;
     this.calculateTotals(); // if you have a method that updates amountLeft
   }
-  updateChart() {
-    // If nothing entered, show single color
-    const hasData = this.allCategories.flat().some(i => Number(i.planned) > 0);
-    if (!hasData) {
-      this.pieChartData = [100]; // 1 slice
-      this.pieChartLabels = ['No Data'];
-      this.pieChartColors = [{ backgroundColor: ['#c0c0c0'] }];
-      return;
-    }
 
-    // Prepare percentage-wise data
-    const data: number[] = [];
-    const labels: string[] = [];
-    const colors: string[] = [
-      '#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63',
-      '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'
-    ];
-
-    this.allCategories.forEach((catArr, index) => {
-      const total = catArr.reduce((sum, i) => sum + Number(i.planned), 0);
-      if (total > 0) {
-        data.push(total);
-        labels.push(this.pieChartLabels[index]);
-      }
-    });
-    this.pieChartData = data;
-    this.pieChartLabels = labels;
-    this.pieChartColors = [{ backgroundColor: colors.slice(0, data.length) }];
-  }
   getMonthKey(): string {
     const month = (this.selectedMonthIndex + 1).toString().padStart(2, '0');
     return `${this.selectedYear}-${month}`;
@@ -467,5 +456,72 @@ export class Budget implements OnInit {
     const currentKey = this.getStorageKey();
     localStorage.setItem(currentKey, lastData);
     this.loadBudgetForMonth(); // reload the copied data
+  }
+  calculateSummaryPieChart() {
+
+    const categories = [
+      { name: 'Income', data: this.income },
+      { name: 'Savings', data: this.savings },
+      { name: 'Giving', data: this.giving },
+      { name: 'Housing', data: this.housing },
+      { name: 'Transportation', data: this.tranportation },
+      { name: 'Food', data: this.food },
+      { name: 'Personal', data: this.personal },
+      { name: 'Health', data: this.health },
+      { name: 'Insurance', data: this.insurance },
+      { name: 'Loan', data: this.loan },
+      { name: 'Entertainment', data: this.entertainment },
+      { name: 'Child Care', data: this.childcare }
+    ];
+
+    const labels: string[] = [];
+    const values: number[] = [];
+    let total = 0;
+
+    categories.forEach(cat => {
+      const sum = cat.data.reduce((acc, item) => acc + Number(item.planned), 0);
+      if (sum > 0) {
+        labels.push(cat.name);
+        values.push(sum);
+        total += sum;
+      }
+    });
+
+    // 👉 NO DATA CASE
+    if (total === 0) {
+      this.pieChartLabels = ['No Data'];
+      this.pieChartData = {
+        labels: ['No Data'],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: ['#e0e0e0']
+          }
+        ]
+      };
+      this.categoryDisplay = [];
+      return;
+    }
+
+    // 👉 Percentages
+    const percentages = values.map(v => +((v / total) * 100).toFixed(1));
+
+    this.pieChartLabels = labels;
+    this.pieChartData = {
+      labels: labels,
+      datasets: [
+        {
+          data: percentages,
+          backgroundColor: this.chartColors.slice(0, percentages.length)
+        }
+      ]
+    };
+
+    // 👉 For bottom category list
+    this.categoryDisplay = labels.map((name, index) => ({
+      name,
+      percent: percentages[index],
+      color: this.chartColors[index]
+    }));
   }
 }

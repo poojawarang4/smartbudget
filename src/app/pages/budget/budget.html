@@ -491,19 +491,17 @@
       <div class="summary-fixed">
         <div class="card">
           <h3>Budget Summary</h3>
-          <img src="assets/pie-chart.png" class="chart" />
-          <div class="legend">
-            <div><span class="dot green"></span> Savings</div>
-            <div><span class="dot purple"></span> Giving</div>
-            <div><span class="dot orange"></span> Housing</div>
-            <div><span class="dot yellow"></span> Transportation</div>
-            <div><span class="dot orange"></span> Food</div>
-            <div><span class="dot pink"></span> Personal</div>
-            <div><span class="dot red"></span> Health</div>
-            <div><span class="dot voilet"></span> Insurance</div>
-            <div><span class="dot indigo"></span> Loan Repayment</div>
-            <div><span class="dot blue"></span> Entertainment</div>
-            <div><span class="dot pista"></span> Child Care</div>
+          <div class="pie-chart-wrapper">
+            <canvas baseChart [data]="pieChartData" [labels]="pieChartLabels" [options]="pieChartOptions"
+              [type]="'pie'">
+            </canvas>
+          </div>
+          <div class="category-list" *ngIf="categoryDisplay.length > 0">
+            <div class="category-row" *ngFor="let c of categoryDisplay">
+              <span class="dot" [style.backgroundColor]="c.color"></span>
+              <span class="name">{{ c.name }}</span>
+              <span class="percent">{{ c.percent }}%</span>
+            </div>
           </div>
           <button class="reset-btn" (click)="openResetPopup()">⟳ Reset Budget</button>
 
