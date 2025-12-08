@@ -259,25 +259,26 @@ export class Budget implements OnInit {
   }
 
   shouldShowSummaryBox(): boolean {
-    if (!this.hasEnteredAmount) return false;
-
     const hasIncomeAmount =
-      this.income?.some((inc: any) =>
-        Number(inc.planned) > 0 || Number(inc.received) > 0
-      ) || false;
+      this.income.some(i => Number(i.planned) > 0 || Number(i.received) > 0);
 
     const hasCategoryAmount =
-      this.allCategories.some((category: any[]) =>
-        category.some((i: any) =>
-          Number(i.planned) > 0 || Number(i.received) > 0
-        )
+      this.allCategories.some(cat =>
+        cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
       );
 
+    // Only show if at least one amount > 0
     return hasIncomeAmount || hasCategoryAmount;
   }
   onAmountChange() {
-    this.hasEnteredAmount = true;
-    this.calculateTotals(); // if you have a method that updates amountLeft
+    const hasAmount =
+      this.income.some(i => Number(i.planned) > 0 || Number(i.received) > 0) ||
+      this.allCategories.some(cat =>
+        cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
+      );
+
+    this.hasEnteredAmount = hasAmount;
+    this.calculateTotals();
   }
 
   getMonthKey(): string {
