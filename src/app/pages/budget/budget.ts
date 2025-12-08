@@ -6,11 +6,12 @@ import { NoBudget } from '../no-budget/no-budget';
 import { MonthService } from '../../../month.service';
 import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
 import { NgChartsModule } from 'ng2-charts';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent, NgChartsModule],
+  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent, NgChartsModule,MatDialogModule],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
@@ -114,7 +115,7 @@ export class Budget implements OnInit {
 
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
-  constructor(private monthService: MonthService) {
+  constructor(private monthService: MonthService,private dialog: MatDialog) {
 
   }
 
@@ -424,7 +425,19 @@ export class Budget implements OnInit {
   }
 
   openResetPopup() {
-    this.showResetPopup = true;
+    // this.showResetPopup = true;
+      const dialogRef = this.dialog.open(ResetBudgetPopupComponent, {
+    width: '500px'
+  });
+
+  dialogRef.afterClosed().subscribe((result) => {
+    console.log('Popup closed:', result);
+      if (result === 'zero') {
+      this.resetAllAmountsToZero();
+    } else if (result === 'copy') {
+      this.copyLastMonthBudget();
+    }
+  });
   }
 
   resetAllAmountsToZero() {
@@ -457,71 +470,97 @@ export class Budget implements OnInit {
     localStorage.setItem(currentKey, lastData);
     this.loadBudgetForMonth(); // reload the copied data
   }
-  calculateSummaryPieChart() {
+calculateSummaryPieChart() {
+  const totalIncome = this.income.reduce((acc, item) => acc + Number(item.planned || 0), 0);
 
-    const categories = [
-      { name: 'Income', data: this.income },
-      { name: 'Savings', data: this.savings },
-      { name: 'Giving', data: this.giving },
-      { name: 'Housing', data: this.housing },
-      { name: 'Transportation', data: this.tranportation },
-      { name: 'Food', data: this.food },
-      { name: 'Personal', data: this.personal },
-      { name: 'Health', data: this.health },
-      { name: 'Insurance', data: this.insurance },
-      { name: 'Loan', data: this.loan },
-      { name: 'Entertainment', data: this.entertainment },
-      { name: 'Child Care', data: this.childcare }
-    ];
-
-    const labels: string[] = [];
-    const values: number[] = [];
-    let total = 0;
-
-    categories.forEach(cat => {
-      const sum = cat.data.reduce((acc, item) => acc + Number(item.planned), 0);
-      if (sum > 0) {
-        labels.push(cat.name);
-        values.push(sum);
-        total += sum;
-      }
-    });
-
-    // 👉 NO DATA CASE
-    if (total === 0) {
-      this.pieChartLabels = ['No Data'];
-      this.pieChartData = {
-        labels: ['No Data'],
-        datasets: [
-          {
-            data: [1],
-            backgroundColor: ['#e0e0e0']
-          }
-        ]
-      };
-      this.categoryDisplay = [];
-      return;
-    }
-
-    // 👉 Percentages
-    const percentages = values.map(v => +((v / total) * 100).toFixed(1));
-
-    this.pieChartLabels = labels;
+  if (totalIncome === 0) {
+    this.pieChartLabels = ['No Data'];
     this.pieChartData = {
-      labels: labels,
-      datasets: [
-        {
-          data: percentages,
-          backgroundColor: this.chartColors.slice(0, percentages.length)
-        }
-      ]
+      labels: ['No Data'],
+      datasets: [{ data: [1], backgroundColor: ['#e0e0e0'] }]
     };
-
-    // 👉 For bottom category list
-    this.categoryDisplay = labels.map((name, index) => ({
-      name,
-      percent: percentages[index],
-      color: this.chartColors[index]
-    }));
+    this.categoryDisplay = [];
+    return;
   }
+
+  const categories = [
+    { name: 'Savings', data: this.savings },
+    { name: 'Giving', data: this.giving },
+    { name: 'Housing', data: this.housing },
+    { name: 'Transportation', data: this.tranportation },
+    { name: 'Food', data: this.food },
+    { name: 'Personal', data: this.personal },
+    { name: 'Health', data: this.health },
+    { name: 'Insurance', data: this.insurance },
+    { name: 'Loan', data: this.loan },
+    { name: 'Entertainment', data: this.entertainment },
+    { name: 'Child Care', data: this.childcare }
+  ];
+
+  const labels: string[] = [];
+  const values: number[] = [];
+
+  categories.forEach(cat => {
+    const sum = cat.data.reduce((acc, item) => acc + Number(item.planned || 0), 0);
+    if (sum > 0) {
+      labels.push(cat.name);
+      values.push(sum);
+    }
+  });
+
+  const percentages = values.map(v => +((v / totalIncome) * 100).toFixed(1));
+
+  const totalPercent = percentages.reduce((a, b) => a + b, 0);
+  const remainingPercent = +(100 - totalPercent).toFixed(1);
+
+  // INTERNAL CHART DATA
+  const chartData = [...percentages, remainingPercent];
+
+  const chartColors = [
+    ...this.chartColors.slice(0, percentages.length),
+    "#e0e0e0" // remaining hidden color
+  ];
+
+  // Labels include remaining but we hide it in UI
+  this.pieChartLabels = [...labels, "Remaining"];
+
+  this.pieChartData = {
+    labels: this.pieChartLabels,
+    datasets: [
+      {
+        data: chartData,
+        backgroundColor: chartColors,
+        borderWidth: 4
+      }
+    ]
+  };
+
+  // ONLY show real categories
+  this.categoryDisplay = labels.map((name, index) => ({
+    name,
+    percent: percentages[index],
+    color: this.chartColors[index]
+  }));
+
+  // HIDE "Remaining" in tooltip & legend
+  this.pieChartOptions = {
+    cutoutPercentage: 70,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context:any) => {
+            if (context.label === "Remaining") return ""; // hide
+            return `${context.label}: ${context.parsed}%`;
+          }
+        }
+      }
+    }
+  };
+}
+
+
+
 }
