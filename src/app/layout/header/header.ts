@@ -32,6 +32,9 @@ export class Header {
 
   // NEW: 9-month list (centered on the selected month)
   visibleMonths: any[] = [];
+  popupCenterMonthIndex: number = this.selectedMonthIndex;
+popupCenterYear: number = this.selectedYear;
+
 
   ngOnInit() {
     this.updateVisibleMonths();
@@ -42,6 +45,8 @@ export class Header {
     this.isMonthPopoverOpen = !this.isMonthPopoverOpen;
 
     if (this.isMonthPopoverOpen) {
+          this.popupCenterMonthIndex = this.selectedMonthIndex;
+    this.popupCenterYear = this.selectedYear;
       this.updateVisibleMonths();
     }
   }
@@ -49,36 +54,38 @@ export class Header {
   /**
    * Build a 9-month sliding window where selected month is always at the center (5th position).
    */
-  updateVisibleMonths() {
-    const result = [];
-    const center = this.selectedMonthIndex;
+updateVisibleMonths() {
+  const result = [];
+  const center = this.popupCenterMonthIndex;
+  let centerYear = this.popupCenterYear;
 
-    for (let offset = -4; offset <= 4; offset++) {
-      let monthIndex = center + offset;
-      let displayYear = this.selectedYear;
+  for (let offset = -4; offset <= 4; offset++) {
+    let monthIndex = center + offset;
+    let displayYear = centerYear;
 
-      // Handle previous year
-      if (monthIndex < 0) {
-        monthIndex = 12 + monthIndex;
-        displayYear = this.selectedYear - 1;
-      }
-
-      // Handle next year
-      if (monthIndex > 11) {
-        monthIndex = monthIndex - 12;
-        displayYear = this.selectedYear + 1;
-      }
-
-      result.push({
-        index: monthIndex,
-        name: this.months[monthIndex].name,
-        year: displayYear,
-        isSelected: offset === 0
-      });
+    // previous year
+    if (monthIndex < 0) {
+      monthIndex += 12;
+      displayYear--;
     }
 
-    this.visibleMonths = result;
+    // next year
+    if (monthIndex > 11) {
+      monthIndex -= 12;
+      displayYear++;
+    }
+
+    result.push({
+      index: monthIndex,
+      name: this.months[monthIndex].name,
+      year: displayYear,
+      isSelected: offset === 0
+    });
   }
+
+  this.visibleMonths = result;
+}
+
 
   selectMonth(index: number, year: number) {
     this.selectedMonthIndex = index;
@@ -87,8 +94,6 @@ export class Header {
     this.monthService.updateMonth(selectedMonthName);
 
     this.isMonthPopoverOpen = false;
-    // this.updateVisibleMonths();
-    // this.isMonthPopoverOpen = false;
   }
 
   goToPreviousMonth() {
@@ -112,5 +117,23 @@ export class Header {
     this.monthService.updateMonth(this.months[this.selectedMonthIndex].name);
     this.updateVisibleMonths();
   }
+goToPopupPreviousMonth() {
+  if (this.popupCenterMonthIndex === 0) {
+    this.popupCenterMonthIndex = 11;
+    this.popupCenterYear--;
+  } else {
+    this.popupCenterMonthIndex--;
+  }
+  this.updateVisibleMonths();
+}
 
+goToPopupNextMonth() {
+  if (this.popupCenterMonthIndex === 11) {
+    this.popupCenterMonthIndex = 0;
+    this.popupCenterYear++;
+  } else {
+    this.popupCenterMonthIndex++;
+  }
+  this.updateVisibleMonths();
+}
 }
