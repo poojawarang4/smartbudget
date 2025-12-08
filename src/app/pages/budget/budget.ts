@@ -8,16 +8,12 @@ import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-po
 import { NgChartsModule } from 'ng2-charts';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent, NgChartsModule,MatDialogModule],
+  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
-  //  providers: [
-  //   provideCharts(withDefaultRegisterables())   // ✅ REQUIRED
-  // ],
 })
 export class Budget implements OnInit {
   isOpen = false;
@@ -115,18 +111,14 @@ export class Budget implements OnInit {
 
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
-  constructor(private monthService: MonthService,private dialog: MatDialog) {
-
-  }
+  constructor(private monthService: MonthService, private dialog: MatDialog) { }
 
   ngOnInit() {
-    this.monthService.selectedMonth$.subscribe(monthName => {
-      this.selectedMonthIndex = this.getMonthIndexFromName(monthName);
+    this.monthService.selectedMonth$.subscribe(data => {
+      this.selectedMonthIndex = data.monthIndex;
+      this.selectedYear = data.year;
       this.loadBudgetForMonth();
     });
-
-    // Load initial month
-    this.loadBudgetForMonth();
     this.allCategories = [
       this.savings || [],
       this.giving || [],
@@ -151,12 +143,12 @@ export class Budget implements OnInit {
     this.loadBudgetForMonth(true);
   }
 
-  getMonthIndexFromName(monthName: string): number {
+  getMonthIndexFromName(index: number): string {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    return months.indexOf(monthName);
+    return months[index];
   }
 
   onMonthChanged(event: any) {
@@ -294,7 +286,7 @@ export class Budget implements OnInit {
   }
 
   loadBudgetForMonth(forceCreate: boolean = false) {
-    const key = this.getStorageKey();
+    const key = this.getMonthKey()
     const savedData = localStorage.getItem(key);
     if (savedData) {
       const budget = JSON.parse(savedData);
@@ -366,7 +358,7 @@ export class Budget implements OnInit {
   }
 
   saveBudget() {
-    const key = this.getStorageKey();
+    const key = this.getMonthKey();
     const data = {
       income: this.income,
       savings: this.savings,
@@ -389,34 +381,31 @@ export class Budget implements OnInit {
   }
 
   copyLatestBudgetForMonth() {
-    const currentMonthIndex = this.selectedMonthIndex;
-    const currentYear = this.selectedYear;
-    // Start from previous month, go backwards
-    let year = currentYear;
-    let month = currentMonthIndex - 1;
-    while (year >= 2020) { // or any reasonable lower bound
+    let year = this.selectedYear;
+    let month = this.selectedMonthIndex - 1;
+
+    while (year >= 2020) {
       if (month < 0) {
         month = 11;
         year--;
         if (year < 2020) break;
       }
-      const key = `budget-${year}-${month}`;
+      const key = `${year}-${(month + 1).toString().padStart(2, '0')}`;
       const saved = localStorage.getItem(key);
       if (saved) {
-        const currentKey = this.getStorageKey();
-        localStorage.setItem(currentKey, saved); // copy latest budget
-        this.loadBudgetForMonth(); // reload copied data
+        localStorage.setItem(this.getMonthKey(), saved);
+        this.loadBudgetForMonth();
         return;
       }
       month--;
     }
-    console.warn("No previous budget found to copy.");
   }
+
 
   findLatestBudget(): any {
     for (let year = 2030; year >= 2020; year--) {
       for (let m = 11; m >= 0; m--) {
-        const key = `budget-${year}-${m}`;
+        const key = `${year}-${(m + 1).toString().padStart(2, '0')}`;
         const saved = localStorage.getItem(key);
         if (saved) return JSON.parse(saved);
       }
@@ -425,19 +414,17 @@ export class Budget implements OnInit {
   }
 
   openResetPopup() {
-    // this.showResetPopup = true;
-      const dialogRef = this.dialog.open(ResetBudgetPopupComponent, {
-    width: '500px'
-  });
-
-  dialogRef.afterClosed().subscribe((result) => {
-    console.log('Popup closed:', result);
+    const dialogRef = this.dialog.open(ResetBudgetPopupComponent, {
+      width: '500px'
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log('Popup closed:', result);
       if (result === 'zero') {
-      this.resetAllAmountsToZero();
-    } else if (result === 'copy') {
-      this.copyLastMonthBudget();
-    }
-  });
+        this.resetAllAmountsToZero();
+      } else if (result === 'copy') {
+        this.copyLastMonthBudget();
+      }
+    });
   }
 
   resetAllAmountsToZero() {
@@ -460,107 +447,100 @@ export class Budget implements OnInit {
   copyLastMonthBudget() {
     const lastMonthIndex = this.selectedMonthIndex === 0 ? 11 : this.selectedMonthIndex - 1;
     const lastMonthYear = this.selectedMonthIndex === 0 ? this.selectedYear - 1 : this.selectedYear;
-    const lastKey = `budget-${lastMonthYear}-${lastMonthIndex}`;
+    const lastKey = `${lastMonthYear}-${(lastMonthIndex + 1).toString().padStart(2, '0')}`;
     const lastData = localStorage.getItem(lastKey);
     if (!lastData) {
       console.warn("No previous budget found.");
       return;
     }
-    const currentKey = this.getStorageKey();
-    localStorage.setItem(currentKey, lastData);
-    this.loadBudgetForMonth(); // reload the copied data
-  }
-calculateSummaryPieChart() {
-  const totalIncome = this.income.reduce((acc, item) => acc + Number(item.planned || 0), 0);
-
-  if (totalIncome === 0) {
-    this.pieChartLabels = ['No Data'];
-    this.pieChartData = {
-      labels: ['No Data'],
-      datasets: [{ data: [1], backgroundColor: ['#e0e0e0'] }]
-    };
-    this.categoryDisplay = [];
-    return;
+    localStorage.setItem(this.getMonthKey(), lastData);
+    this.loadBudgetForMonth();
   }
 
-  const categories = [
-    { name: 'Savings', data: this.savings },
-    { name: 'Giving', data: this.giving },
-    { name: 'Housing', data: this.housing },
-    { name: 'Transportation', data: this.tranportation },
-    { name: 'Food', data: this.food },
-    { name: 'Personal', data: this.personal },
-    { name: 'Health', data: this.health },
-    { name: 'Insurance', data: this.insurance },
-    { name: 'Loan', data: this.loan },
-    { name: 'Entertainment', data: this.entertainment },
-    { name: 'Child Care', data: this.childcare }
-  ];
-
-  const labels: string[] = [];
-  const values: number[] = [];
-
-  categories.forEach(cat => {
-    const sum = cat.data.reduce((acc, item) => acc + Number(item.planned || 0), 0);
-    if (sum > 0) {
-      labels.push(cat.name);
-      values.push(sum);
+  calculateSummaryPieChart() {
+    const totalIncome = this.income.reduce((acc, item) => acc + Number(item.planned || 0), 0);
+    if (totalIncome === 0) {
+      this.pieChartLabels = ['No Data'];
+      this.pieChartData = {
+        labels: ['No Data'],
+        datasets: [{ data: [1], backgroundColor: ['#e0e0e0'] }]
+      };
+      this.categoryDisplay = [];
+      return;
     }
-  });
 
-  const percentages = values.map(v => +((v / totalIncome) * 100).toFixed(1));
-
-  const totalPercent = percentages.reduce((a, b) => a + b, 0);
-  const remainingPercent = +(100 - totalPercent).toFixed(1);
-
-  // INTERNAL CHART DATA
-  const chartData = [...percentages, remainingPercent];
-
-  const chartColors = [
-    ...this.chartColors.slice(0, percentages.length),
-    "#e0e0e0" // remaining hidden color
-  ];
-
-  // Labels include remaining but we hide it in UI
-  this.pieChartLabels = [...labels, "Remaining"];
-
-  this.pieChartData = {
-    labels: this.pieChartLabels,
-    datasets: [
-      {
-        data: chartData,
-        backgroundColor: chartColors,
-        borderWidth: 4
+    const categories = [
+      { name: 'Savings', data: this.savings },
+      { name: 'Giving', data: this.giving },
+      { name: 'Housing', data: this.housing },
+      { name: 'Transportation', data: this.tranportation },
+      { name: 'Food', data: this.food },
+      { name: 'Personal', data: this.personal },
+      { name: 'Health', data: this.health },
+      { name: 'Insurance', data: this.insurance },
+      { name: 'Loan', data: this.loan },
+      { name: 'Entertainment', data: this.entertainment },
+      { name: 'Child Care', data: this.childcare }
+    ];
+    const labels: string[] = [];
+    const values: number[] = [];
+    categories.forEach(cat => {
+      const sum = cat.data.reduce((acc, item) => acc + Number(item.planned || 0), 0);
+      if (sum > 0) {
+        labels.push(cat.name);
+        values.push(sum);
       }
-    ]
-  };
+    });
 
-  // ONLY show real categories
-  this.categoryDisplay = labels.map((name, index) => ({
-    name,
-    percent: percentages[index],
-    color: this.chartColors[index]
-  }));
+    const percentages = values.map(v => +((v / totalIncome) * 100).toFixed(1));
+    const totalPercent = percentages.reduce((a, b) => a + b, 0);
+    const remainingPercent = +(100 - totalPercent).toFixed(1);
 
-  // HIDE "Remaining" in tooltip & legend
-  this.pieChartOptions = {
-    cutoutPercentage: 70,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: (context:any) => {
-            if (context.label === "Remaining") return ""; // hide
-            return `${context.label}: ${context.parsed}%`;
+    // INTERNAL CHART DATA
+    const chartData = [...percentages, remainingPercent];
+
+    const chartColors = [
+      ...this.chartColors.slice(0, percentages.length),
+      "#e0e0e0" // remaining hidden color
+    ];
+
+    // Labels include remaining but we hide it in UI
+    this.pieChartLabels = [...labels, "Remaining"];
+
+    this.pieChartData = {
+      labels: this.pieChartLabels,
+      datasets: [
+        {
+          data: chartData,
+          backgroundColor: chartColors,
+          borderWidth: 4
+        }
+      ]
+    };
+
+    // ONLY show real categories
+    this.categoryDisplay = labels.map((name, index) => ({
+      name,
+      percent: percentages[index],
+      color: this.chartColors[index]
+    }));
+
+    // HIDE "Remaining" in tooltip & legend
+    this.pieChartOptions = {
+      cutoutPercentage: 70,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              if (context.label === "Remaining") return ""; // hide
+              return `${context.label}: ${context.parsed}%`;
+            }
           }
         }
       }
-    }
-  };
-}
-
-
-
+    };
+  }
 }

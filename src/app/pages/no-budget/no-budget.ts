@@ -19,11 +19,18 @@ export class NoBudget {
   constructor(private router: Router, private monthService: MonthService) { }
 
   ngOnInit() {
-    this.monthService.selectedMonth$.subscribe(month => {
-      this.selectedMonth = month;
+    this.monthService.selectedMonth$.subscribe(data => {
+      this.selectedMonth = this.getMonthName(data.monthIndex);
     });
     this.hasLatestBudget = this.checkIfAnyBudgetExists();
   }
+  getMonthName(index: number): string {
+  const names = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return names[index];
+}
 
   goToBudgetPage() {
     this.startPlanning.emit();

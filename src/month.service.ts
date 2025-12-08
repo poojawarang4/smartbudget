@@ -5,13 +5,17 @@ import { BehaviorSubject } from 'rxjs';
 export class MonthService {
 
   // Default → full month name
-  private currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
+  // private currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
 
-  private selectedMonthSource = new BehaviorSubject<string>(this.getCurrentMonth());
-  selectedMonth$ = this.selectedMonthSource.asObservable();
+  // private selectedMonthSource = new BehaviorSubject<string>(this.getCurrentMonth());
+  private monthSubject = new BehaviorSubject<{monthIndex: number, year: number}>({
+  monthIndex: new Date().getMonth(),
+  year: new Date().getFullYear()
+});
+  selectedMonth$ = this.monthSubject.asObservable();
 
-  updateMonth(month: string) {
-    this.selectedMonthSource.next(month);
+  updateMonth(monthIndex: number, year: number) {
+    this.monthSubject.next({monthIndex,year});
   }
   getCurrentMonth() {
     const monthNames = [

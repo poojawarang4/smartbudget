@@ -52,23 +52,18 @@
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned" (input)="onAmountChange()"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
               </td>
-
-
               <!-- Received Editable -->
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received',true)">
                   ₹ {{ item.received }}
                 </span>
-
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
                   (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
               </td>
             </tr>
-
           </table>
         </div>
-
 
         <!-- Savings -->
         <div class="card">
@@ -105,7 +100,6 @@
           </table>
         </div>
 
-
         <!-- Giving -->
         <div class="card">
           <table class="table">
@@ -140,7 +134,6 @@
             </tr>
           </table>
         </div>
-
 
         <!-- Housing -->
         <div class="accordion-item" [class.open]="isOpen">
@@ -252,7 +245,6 @@
               <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
 
-
               <span *ngIf="!item.editReceived" class="amount clickable-amount"
                 (click)="editAmount(item, 'received', false)">
                 ₹ {{ item.received }}
@@ -261,11 +253,9 @@
               <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
                 (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
 
-
             </div>
           </div>
         </div>
-
 
         <!-- Personal -->
         <div class="card">
@@ -337,7 +327,6 @@
           </table>
         </div>
 
-
         <!-- Insurance -->
         <div class="accordion-item" [class.open]="isOpeni">
           <div class="accordion-header" (click)="togglei()">
@@ -371,8 +360,6 @@
 
               <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
                 (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-
-
             </div>
           </div>
         </div>
@@ -412,7 +399,6 @@
           </table>
         </div>
 
-
         <!-- Entertainment -->
         <div class="card">
           <table class="table">
@@ -448,7 +434,6 @@
           </table>
         </div>
 
-
         <!-- Child Care -->
         <div class="card">
           <table class="table">
@@ -483,7 +468,6 @@
             </tr>
           </table>
         </div>
-
       </div>
 
       <!-- RIGHT SIDE (FIXED BUDGET SUMMARY) -->
@@ -513,7 +497,6 @@
       <div class="left-toast" *ngIf="showLeftToast">
         {{ leftMessage }}
       </div>
-
     </div>
   </div>
 </div>
