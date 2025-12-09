@@ -1,6 +1,15 @@
 <div *ngIf="!budgetExistsForMonth">
-  <app-no-budget (startPlanning)="startPlanningForMonth()"
-    (copyLatestBudget)="copyLatestBudgetForMonth()"></app-no-budget>
+  <!-- <app-no-budget (startPlanning)="startPlanningForMonth()"
+    (copyLatestBudget)="copyLatestBudgetForMonth()"></app-no-budget> -->
+    <div class="center-wrapper">
+  <img src="assets/budget-icon.png" class="icon" />
+
+  <h1>Hey there, looks like you need a budget for {{ selectedMonth }}.</h1>
+
+  <button class="btn-green" (click)="startPlanningForMonth()">Start Planning for {{ selectedMonth }}</button>
+  <button class="btn-green" *ngIf="hasLatestBudget" (click)="copyLatestBudgetForMonth()">Copied From Latest
+    Budget</button>
+</div>
 </div>
 
 <div *ngIf="budgetExistsForMonth">

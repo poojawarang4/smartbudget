@@ -10,7 +10,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, NoBudget, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
@@ -44,6 +44,7 @@ export class Budget implements OnInit {
   selectedMonth = '';
   expenses: any[] = [];
   showResetPopup = false;
+  hasLatestBudget: boolean = false;
   income = [
     { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
     { name: 'Salary 2', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
@@ -114,6 +115,10 @@ export class Budget implements OnInit {
   constructor(private monthService: MonthService, private dialog: MatDialog) { }
 
   ngOnInit() {
+        this.monthService.selectedMonth$.subscribe(data => {
+      this.selectedMonth = this.getMonthName(data.monthIndex);
+    });
+    this.hasLatestBudget = this.checkIfAnyBudgetExists();
     this.monthService.selectedMonth$.subscribe(data => {
       this.selectedMonthIndex = data.monthIndex;
       this.selectedYear = data.year;
@@ -134,6 +139,17 @@ export class Budget implements OnInit {
     ];
     this.calculateSummaryPieChart();
   }
+  
+  checkIfAnyBudgetExists(): boolean {
+    for (let year = 2020; year <= 2030; year++) {
+      for (let m = 0; m < 12; m++) {
+        const key = `budget-${year}-${m}`;
+        if (localStorage.getItem(key)) return true;
+      }
+    }
+    return false;
+  }
+  
   startPlanningForNewMonth() {
     this.resetToZeroValues();
     this.budgetExistsForMonth = true;
