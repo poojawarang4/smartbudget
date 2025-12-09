@@ -663,7 +663,7 @@ export class Budget implements OnInit {
       percent: percentages[index],
       color: this.chartColors[index]
     }));
-
+    const localValues = values;
     // HIDE "Remaining" in tooltip & legend
     this.pieChartOptions = {
       cutoutPercentage: 70,
@@ -674,12 +674,71 @@ export class Budget implements OnInit {
         tooltip: {
           callbacks: {
             label: (context: any) => {
-              if (context.label === "Remaining") return ""; // hide
-              return `${context.label}: ${context.parsed}%`;
+              const categoryName = context.label;
+
+              // Skip "Remaining"
+              if (categoryName === "Remaining") {
+                return `Remaining – ${context.raw}%`;
+              }
+              const index = context.dataIndex;
+
+              // Find category object
+              const category = categories.find(c => c.name === categoryName);
+              const items = category?.data || [];
+
+              // Total amount for this category
+              const totalCategoryAmount = values[index];
+
+              // % of total income
+              const categoryPercent = context.raw;
+
+              // Format amount
+              const formattedCategoryTotal = new Intl.NumberFormat('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }).format(totalCategoryAmount);
+
+              // Build hierarchical breakdown
+              let breakdown = `${categoryName} – ₹${formattedCategoryTotal} (${categoryPercent}%)\n`;
+
+              items.forEach(item => {
+                const amt = Number(item.planned || 0);
+                const percentInsideCategory =
+                  totalCategoryAmount > 0
+                    ? ((amt / totalCategoryAmount) * 100).toFixed(1)
+                    : 0;
+
+                const formattedAmt = new Intl.NumberFormat('en-IN', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }).format(amt);
+
+                breakdown += `\n• ${item.name} – ₹${formattedAmt} (${percentInsideCategory}%)`;
+              });
+
+              return breakdown;
             }
           }
         }
+
       }
     };
   }
+
+  getBreakdownText(categoryItems: any[], totalCategoryAmount: number) {
+    return categoryItems
+      .map(item => {
+        const amt = Number(item.planned || 0);
+        const percent = totalCategoryAmount > 0 ? ((amt / totalCategoryAmount) * 100).toFixed(1) : 0;
+
+        const formattedAmt = new Intl.NumberFormat('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(amt);
+
+        return `• ${item.name} – ₹ ${formattedAmt} (${percent}%)`;
+      })
+      .join('\n');
+  }
+
 }
