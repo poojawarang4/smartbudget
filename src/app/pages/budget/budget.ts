@@ -115,7 +115,7 @@ export class Budget implements OnInit {
   constructor(private monthService: MonthService, private dialog: MatDialog) { }
 
   ngOnInit() {
-        this.monthService.selectedMonth$.subscribe(data => {
+    this.monthService.selectedMonth$.subscribe(data => {
       this.selectedMonth = this.getMonthName(data.monthIndex);
     });
     this.hasLatestBudget = this.checkIfAnyBudgetExists();
@@ -139,7 +139,7 @@ export class Budget implements OnInit {
     ];
     this.calculateSummaryPieChart();
   }
-  
+
   checkIfAnyBudgetExists(): boolean {
     for (let year = 2020; year <= 2030; year++) {
       for (let m = 0; m < 12; m++) {
@@ -149,7 +149,7 @@ export class Budget implements OnInit {
     }
     return false;
   }
-  
+
   startPlanningForNewMonth() {
     this.resetToZeroValues();
     this.budgetExistsForMonth = true;

@@ -1,15 +1,15 @@
 <div *ngIf="!budgetExistsForMonth">
   <!-- <app-no-budget (startPlanning)="startPlanningForMonth()"
     (copyLatestBudget)="copyLatestBudgetForMonth()"></app-no-budget> -->
-    <div class="center-wrapper">
-  <img src="assets/budget-icon.png" class="icon" />
+  <div class="center-wrapper">
+    <img src="assets/budget-icon.png" class="icon" />
 
-  <h1>Hey there, looks like you need a budget for {{ selectedMonth }}.</h1>
+    <h1>Hey there, looks like you need a budget for {{ selectedMonth }}.</h1>
 
-  <button class="btn-green" (click)="startPlanningForMonth()">Start Planning for {{ selectedMonth }}</button>
-  <button class="btn-green" *ngIf="hasLatestBudget" (click)="copyLatestBudgetForMonth()">Copied From Latest
-    Budget</button>
-</div>
+    <button class="btn-green" (click)="startPlanningForMonth()">Start Planning for {{ selectedMonth }}</button>
+    <button class="btn-green" *ngIf="hasLatestBudget" (click)="copyLatestBudgetForMonth()">Copied From Latest
+      Budget</button>
+  </div>
 </div>
 
 <div *ngIf="budgetExistsForMonth">
@@ -18,15 +18,15 @@
 
   <div *ngIf="shouldShowSummaryBox()" class="budget-summary-box">
 
-    <h3 *ngIf="amountLeft > 0" class="left-budget">
+    <h3 *ngIf="amountLeft > 0 && hasEnteredAmount" class="left-budget">
       Amount left to budget: Rs. {{ amountLeft }}
     </h3>
 
-    <h3 *ngIf="amountLeft === 0" class="balanced">
+    <h3 *ngIf="amountLeft === 0 && hasEnteredAmount" class="balanced">
       🎉 You've Got a Budget!
     </h3>
 
-    <h3 *ngIf="amountLeft < 0" class="over-budget">
+    <h3 *ngIf="amountLeft < 0 && hasEnteredAmount" class="over-budget">
       Amount over budget: Rs. {{ amountLeft * -1 }}
     </h3>
 
