@@ -5,7 +5,7 @@
 
   <label class="option">
     <input type="radio" name="resetOption" value="zero" [(ngModel)]="selectedOption">
-    <span>Make all planned amounts <b>$0.00</b></span>
+    <span>Make all planned amounts <b>₹0.00</b></span>
   </label>
 
   <label class="option">
@@ -15,6 +15,6 @@
 
   <div class="actions">
     <button class="cancel" (click)="close()">Cancel</button>
-    <button class="next" [disabled]="!selectedOption" (click)="confirm()">Next</button>
+    <button class="next" [disabled]="!selectedOption" (click)="confirm()">Save</button>
   </div>
 </div>

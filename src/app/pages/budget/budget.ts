@@ -1,12 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { Component, LOCALE_ID, OnInit } from '@angular/core';
 import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { NoBudget } from '../no-budget/no-budget';
 import { MonthService } from '../../../month.service';
 import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
 import { NgChartsModule } from 'ng2-charts';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import localeIn from '@angular/common/locales/en-IN';
+import { registerLocaleData } from '@angular/common';
+
+registerLocaleData(localeIn);
 
 @Component({
   selector: 'app-budget',
@@ -14,6 +18,10 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'en-IN' }
+  ]
+
 })
 export class Budget implements OnInit {
   isOpen = false;
@@ -45,6 +53,9 @@ export class Budget implements OnInit {
   expenses: any[] = [];
   showResetPopup = false;
   hasLatestBudget: boolean = false;
+  successPopup = false;
+  successMessage = "";
+
   income = [
     { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
     { name: 'Salary 2', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
@@ -115,7 +126,7 @@ export class Budget implements OnInit {
   constructor(private monthService: MonthService, private dialog: MatDialog) { }
 
   ngOnInit() {
-      // this.checkLatestBudget();
+    // this.checkLatestBudget();
     this.monthService.selectedMonth$.subscribe(data => {
       this.selectedMonth = this.getMonthName(data.monthIndex);
     });
@@ -150,71 +161,71 @@ export class Budget implements OnInit {
     }
     return false;
   }
-//   checkIfAnyBudgetExists(): boolean {
-//   for (let year = 2020; year <= 2030; year++) {
-//     for (let m = 0; m < 12; m++) {
-//       const key = `budget-${year}-${m}`;
-//       const item = localStorage.getItem(key);
+  //   checkIfAnyBudgetExists(): boolean {
+  //   for (let year = 2020; year <= 2030; year++) {
+  //     for (let m = 0; m < 12; m++) {
+  //       const key = `budget-${year}-${m}`;
+  //       const item = localStorage.getItem(key);
 
-//       if (item) {
-//         const budget = JSON.parse(item);
+  //       if (item) {
+  //         const budget = JSON.parse(item);
 
-//         // Check if any value is > 0
-//         const hasRealBudget = Object.values(budget).some(value => Number(value) > 0);
+  //         // Check if any value is > 0
+  //         const hasRealBudget = Object.values(budget).some(value => Number(value) > 0);
 
-//         if (hasRealBudget) return true;
-//       }
-//     }
-//   }
-//   return false;
-// }
-// checkLatestBudget() {
-//   const prevKey = this.getPreviousMonthKey();
+  //         if (hasRealBudget) return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
+  // checkLatestBudget() {
+  //   const prevKey = this.getPreviousMonthKey();
 
-//   const item = prevKey ? localStorage.getItem(prevKey) : null;
+  //   const item = prevKey ? localStorage.getItem(prevKey) : null;
 
-//   if (!item) {
-//     this.hasLatestBudget = false;
-//     return;
-//   }
+  //   if (!item) {
+  //     this.hasLatestBudget = false;
+  //     return;
+  //   }
 
-//   const budget = JSON.parse(item);
+  //   const budget = JSON.parse(item);
 
-//   // Check if any planned/received > 0
-//   this.hasLatestBudget = Object.values(budget)
-//     .flat()
-//     .some(i =>
-//       Number(i.planned) > 0 || Number(i.received) > 0
-//     );
-// }
+  //   // Check if any planned/received > 0
+  //   this.hasLatestBudget = Object.values(budget)
+  //     .flat()
+  //     .some(i =>
+  //       Number(i.planned) > 0 || Number(i.received) > 0
+  //     );
+  // }
 
 
-getCurrentYearMonth() {
-  const key = this.getMonthKey(); // e.g., budget-2025-10
-  const parts = key.split('-');   // ["budget", "2025", "10"]
+  getCurrentYearMonth() {
+    const key = this.getMonthKey(); // e.g., budget-2025-10
+    const parts = key.split('-');   // ["budget", "2025", "10"]
 
-  return {
-    year: Number(parts[1]),
-    month: Number(parts[2])
-  };
-}
-
-getPreviousMonthKey(): string | null {
-  const { year, month } = this.getCurrentYearMonth();
-
-  let prevYear = year;
-  let prevMonth = month - 1; // month is 1–12 here
-
-  if (prevMonth === 0) {
-    prevYear--;
-    prevMonth = 12;
+    return {
+      year: Number(parts[1]),
+      month: Number(parts[2])
+    };
   }
 
-  if (prevYear < 2020) return null;
+  getPreviousMonthKey(): string | null {
+    const { year, month } = this.getCurrentYearMonth();
 
-  // Return correct localStorage key format
-  return `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
-}
+    let prevYear = year;
+    let prevMonth = month - 1; // month is 1–12 here
+
+    if (prevMonth === 0) {
+      prevYear--;
+      prevMonth = 12;
+    }
+
+    if (prevYear < 2020) return null;
+
+    // Return correct localStorage key format
+    return `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
+  }
 
   startPlanningForNewMonth() {
     this.resetToZeroValues();
@@ -334,12 +345,35 @@ getPreviousMonthKey(): string | null {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  // finishEdit(item: any, type: string) {
+  //   item["edit" + this.capitalize(type)] = false;
+  //   this.onAmountChange();
+  //   this.calculateSummaryPieChart();
+  //   this.saveBudget();  // ← Save month-wise
+  // }
   finishEdit(item: any, type: string) {
+    // Convert empty, null or invalid value → 0
+    if (
+      item[type] === '' ||
+      item[type] === null ||
+      item[type] === undefined ||
+      isNaN(Number(item[type]))
+    ) {
+      item[type] = 0.00;
+    } else {
+      // Ensure number type
+      item[type] = Number(item[type]);
+    }
+
+    // Close edit mode
     item["edit" + this.capitalize(type)] = false;
+
+    // Recalculate UI + save
     this.onAmountChange();
     this.calculateSummaryPieChart();
-    this.saveBudget();  // ← Save month-wise
+    this.saveBudget();  // Save month-wise
   }
+
 
   shouldShowSummaryBox(): boolean {
     const hasIncomeAmount =
@@ -538,7 +572,15 @@ getPreviousMonthKey(): string | null {
     this.saveBudget();              // 🟢 Save reset values FIRST
     this.calculateTotals();         // 🟢 Recalculate
 
-    alert("All planned amounts have been reset to ₹0.");
+    this.showSuccessPopup("All amounts were reset to ₹0.");
+  }
+  showSuccessPopup(msg: string) {
+    this.successMessage = msg;
+    this.successPopup = true;
+
+    setTimeout(() => {
+      this.successPopup = false;
+    }, 2000); // auto-close after 2 sec
   }
 
   // copyLastMonthBudget() {

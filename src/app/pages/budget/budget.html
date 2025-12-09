@@ -1,42 +1,20 @@
 <div *ngIf="!budgetExistsForMonth">
-  <!-- <app-no-budget (startPlanning)="startPlanningForMonth()"
-    (copyLatestBudget)="copyLatestBudgetForMonth()"></app-no-budget> -->
   <div class="center-wrapper">
     <img src="assets/budget-icon.png" class="icon" />
-
     <h1>Hey there, looks like you need a budget for {{ selectedMonth }}.</h1>
-
     <button class="btn-green" (click)="startPlanningForMonth()">Start Planning for {{ selectedMonth }}</button>
-    <button class="btn-green" *ngIf="hasLatestBudget" (click)="copyLatestBudgetForMonth()">Copied From Latest
+    <button class="btn-green" *ngIf="hasLatestBudget" (click)="copyLatestBudgetForMonth()">Copy From Latest
       Budget</button>
   </div>
 </div>
 
 <div *ngIf="budgetExistsForMonth">
   <!-- your full app-budget page -->
-
-
-  <div *ngIf="shouldShowSummaryBox()" class="budget-summary-box">
-
-    <h3 *ngIf="amountLeft > 0 && hasEnteredAmount" class="left-budget">
-      Amount left to budget: Rs. {{ amountLeft }}
-    </h3>
-
-    <h3 *ngIf="amountLeft === 0 && hasEnteredAmount" class="balanced">
-      🎉 You've Got a Budget!
-    </h3>
-
-    <h3 *ngIf="amountLeft < 0 && hasEnteredAmount" class="over-budget">
-      Amount over budget: Rs. {{ amountLeft * -1 }}
-    </h3>
-
-  </div>
   <div *ngIf="budgetExistsForMonth">
     <div class="layout">
 
       <!-- LEFT SIDE (SCROLL AREA) -->
       <div class="left-scroll scroll-area">
-
         <!-- INCOME -->
         <div class="card">
           <table class="table">
@@ -54,25 +32,25 @@
                 <!-- DISPLAY MODE -->
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', true)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2'}}
                 </span>
 
                 <!-- EDIT MODE -->
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned" (input)="onAmountChange()"
+                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
               </td>
               <!-- Received Editable -->
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received',true)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
                   (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
               </td>
             </tr>
           </table>
-        </div>
+        </div>s
 
         <!-- Savings -->
         <div class="card">
@@ -89,7 +67,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -99,7 +77,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -124,7 +102,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -134,7 +112,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -168,7 +146,7 @@
               <span>{{ item.name }}</span>
               <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                 (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned }}
+                ₹ {{ item.planned | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -176,7 +154,7 @@
 
               <span *ngIf="!item.editReceived" class="amount clickable-amount"
                 (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received }}
+                ₹ {{ item.received | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -210,7 +188,7 @@
               <span>{{ item.name }}</span>
               <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                 (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned }}
+                ₹ {{ item.planned | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -218,7 +196,7 @@
 
               <span *ngIf="!item.editReceived" class="amount clickable-amount"
                 (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received }}
+                ₹ {{ item.received | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -248,7 +226,7 @@
               <span>{{ item.name }}</span>
               <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                 (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned }}
+                ₹ {{ item.planned | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -256,7 +234,7 @@
 
               <span *ngIf="!item.editReceived" class="amount clickable-amount"
                 (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received }}
+                ₹ {{ item.received | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -281,7 +259,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -291,7 +269,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -316,7 +294,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -326,7 +304,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -356,7 +334,7 @@
               <span>{{ item.name }}</span>
               <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                 (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned }}
+                ₹ {{ item.planned | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -364,7 +342,7 @@
 
               <span *ngIf="!item.editReceived" class="amount clickable-amount"
                 (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received }}
+                ₹ {{ item.received | number:'1.2-2' }}
               </span>
 
               <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -388,7 +366,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -398,7 +376,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -423,7 +401,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -433,7 +411,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -458,7 +436,7 @@
               <td>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned }}
+                  ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -468,7 +446,7 @@
               <td>
                 <span *ngIf="!item.editReceived" class="amount clickable-amount"
                   (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received }}
+                  ₹ {{ item.received | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
@@ -482,6 +460,22 @@
       <!-- RIGHT SIDE (FIXED BUDGET SUMMARY) -->
       <div class="summary-fixed">
         <div class="card">
+          <div *ngIf="shouldShowSummaryBox()">
+
+            <h3 *ngIf="amountLeft > 0 && hasEnteredAmount" class="left-budget">
+              Amount left to budget: Rs. {{ amountLeft | number:'1.2-2' }}
+            </h3>
+
+            <h3 *ngIf="amountLeft === 0 && hasEnteredAmount" class="balanced">
+              🎉 You've Got a Budget!
+            </h3>
+
+            <h3 *ngIf="amountLeft < 0 && hasEnteredAmount" class="over-budget">
+              Amount over budget: Rs. {{ amountLeft * -1 | number:'1.2-2' }}
+            </h3>
+          </div>
+          <div class="divider"></div>
+
           <h3>Budget Summary</h3>
           <div class="pie-chart-wrapper">
             <canvas baseChart [data]="pieChartData" [labels]="pieChartLabels" [options]="pieChartOptions"
@@ -508,4 +502,8 @@
       </div>
     </div>
   </div>
+  <div class="success-popup" *ngIf="successPopup">
+    {{ successMessage }}
+  </div>
+
 </div>
