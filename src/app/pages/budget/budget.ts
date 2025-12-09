@@ -115,6 +115,7 @@ export class Budget implements OnInit {
   constructor(private monthService: MonthService, private dialog: MatDialog) { }
 
   ngOnInit() {
+      // this.checkLatestBudget();
     this.monthService.selectedMonth$.subscribe(data => {
       this.selectedMonth = this.getMonthName(data.monthIndex);
     });
@@ -140,34 +141,80 @@ export class Budget implements OnInit {
     this.calculateSummaryPieChart();
   }
 
-  // checkIfAnyBudgetExists(): boolean {
-  //   for (let year = 2020; year <= 2030; year++) {
-  //     for (let m = 0; m < 12; m++) {
-  //       const key = `budget-${year}-${m}`;
-  //       if (localStorage.getItem(key)) return true;
-  //     }
-  //   }
-  //   return false;
-  // }
   checkIfAnyBudgetExists(): boolean {
-  for (let year = 2020; year <= 2030; year++) {
-    for (let m = 0; m < 12; m++) {
-      const key = `budget-${year}-${m}`;
-      const item = localStorage.getItem(key);
-
-      if (item) {
-        const budget = JSON.parse(item);
-
-        // Check if any value is > 0
-        const hasRealBudget = Object.values(budget).some(value => Number(value) > 0);
-
-        if (hasRealBudget) return true;
+    for (let year = 2020; year <= 2030; year++) {
+      for (let m = 0; m < 12; m++) {
+        const key = `budget-${year}-${m}`;
+        if (localStorage.getItem(key)) return true;
       }
     }
+    return false;
   }
-  return false;
+//   checkIfAnyBudgetExists(): boolean {
+//   for (let year = 2020; year <= 2030; year++) {
+//     for (let m = 0; m < 12; m++) {
+//       const key = `budget-${year}-${m}`;
+//       const item = localStorage.getItem(key);
+
+//       if (item) {
+//         const budget = JSON.parse(item);
+
+//         // Check if any value is > 0
+//         const hasRealBudget = Object.values(budget).some(value => Number(value) > 0);
+
+//         if (hasRealBudget) return true;
+//       }
+//     }
+//   }
+//   return false;
+// }
+// checkLatestBudget() {
+//   const prevKey = this.getPreviousMonthKey();
+
+//   const item = prevKey ? localStorage.getItem(prevKey) : null;
+
+//   if (!item) {
+//     this.hasLatestBudget = false;
+//     return;
+//   }
+
+//   const budget = JSON.parse(item);
+
+//   // Check if any planned/received > 0
+//   this.hasLatestBudget = Object.values(budget)
+//     .flat()
+//     .some(i =>
+//       Number(i.planned) > 0 || Number(i.received) > 0
+//     );
+// }
+
+
+getCurrentYearMonth() {
+  const key = this.getMonthKey(); // e.g., budget-2025-10
+  const parts = key.split('-');   // ["budget", "2025", "10"]
+
+  return {
+    year: Number(parts[1]),
+    month: Number(parts[2])
+  };
 }
 
+getPreviousMonthKey(): string | null {
+  const { year, month } = this.getCurrentYearMonth();
+
+  let prevYear = year;
+  let prevMonth = month - 1; // month is 1–12 here
+
+  if (prevMonth === 0) {
+    prevYear--;
+    prevMonth = 12;
+  }
+
+  if (prevYear < 2020) return null;
+
+  // Return correct localStorage key format
+  return `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
+}
 
   startPlanningForNewMonth() {
     this.resetToZeroValues();
@@ -187,6 +234,7 @@ export class Budget implements OnInit {
   }
 
   onMonthChanged(event: any) {
+    //  this.checkLatestBudget();
     this.selectedMonthIndex = event.monthIndex;
     this.selectedYear = event.year;
 
