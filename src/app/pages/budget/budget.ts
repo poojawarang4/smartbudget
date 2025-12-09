@@ -441,7 +441,7 @@ export class Budget implements OnInit {
       if (result === 'zero') {
         this.resetAllAmountsToZero();
       } else if (result === 'copy') {
-        this.copyLastMonthBudget();
+        this.copyLatestBudgetForMonth();
       }
     });
   }
@@ -474,18 +474,18 @@ export class Budget implements OnInit {
     alert("All planned amounts have been reset to ₹0.");
   }
 
-  copyLastMonthBudget() {
-    const lastMonthIndex = this.selectedMonthIndex === 0 ? 11 : this.selectedMonthIndex - 1;
-    const lastMonthYear = this.selectedMonthIndex === 0 ? this.selectedYear - 1 : this.selectedYear;
-    const lastKey = `${lastMonthYear}-${(lastMonthIndex + 1).toString().padStart(2, '0')}`;
-    const lastData = localStorage.getItem(lastKey);
-    if (!lastData) {
-      console.warn("No previous budget found.");
-      return;
-    }
-    localStorage.setItem(this.getMonthKey(), lastData);
-    this.loadBudgetForMonth();
-  }
+  // copyLastMonthBudget() {
+  //   const lastMonthIndex = this.selectedMonthIndex === 0 ? 11 : this.selectedMonthIndex - 1;
+  //   const lastMonthYear = this.selectedMonthIndex === 0 ? this.selectedYear - 1 : this.selectedYear;
+  //   const lastKey = `${lastMonthYear}-${(lastMonthIndex + 1).toString().padStart(2, '0')}`;
+  //   const lastData = localStorage.getItem(lastKey);
+  //   if (!lastData) {
+  //     console.warn("No previous budget found.");
+  //     return;
+  //   }
+  //   localStorage.setItem(this.getMonthKey(), lastData);
+  //   this.loadBudgetForMonth();
+  // }
 
   calculateSummaryPieChart() {
     const totalIncome = this.income.reduce((acc, item) => acc + Number(item.planned || 0), 0);

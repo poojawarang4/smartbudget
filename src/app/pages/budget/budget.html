@@ -498,7 +498,7 @@
           <button class="reset-btn" (click)="openResetPopup()">⟳ Reset Budget</button>
 
           <app-reset-budget-popup *ngIf="showResetPopup" (closePopup)="showResetPopup = false"
-            (makeZero)="resetAllAmountsToZero()" (copyLast)="copyLastMonthBudget()">
+            (makeZero)="resetAllAmountsToZero()" (copyLast)="copyLatestBudgetForMonth()">
           </app-reset-budget-popup>
         </div>
       </div>
