@@ -161,45 +161,6 @@ export class Budget implements OnInit {
     }
     return false;
   }
-  //   checkIfAnyBudgetExists(): boolean {
-  //   for (let year = 2020; year <= 2030; year++) {
-  //     for (let m = 0; m < 12; m++) {
-  //       const key = `budget-${year}-${m}`;
-  //       const item = localStorage.getItem(key);
-
-  //       if (item) {
-  //         const budget = JSON.parse(item);
-
-  //         // Check if any value is > 0
-  //         const hasRealBudget = Object.values(budget).some(value => Number(value) > 0);
-
-  //         if (hasRealBudget) return true;
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // }
-  // checkLatestBudget() {
-  //   const prevKey = this.getPreviousMonthKey();
-
-  //   const item = prevKey ? localStorage.getItem(prevKey) : null;
-
-  //   if (!item) {
-  //     this.hasLatestBudget = false;
-  //     return;
-  //   }
-
-  //   const budget = JSON.parse(item);
-
-  //   // Check if any planned/received > 0
-  //   this.hasLatestBudget = Object.values(budget)
-  //     .flat()
-  //     .some(i =>
-  //       Number(i.planned) > 0 || Number(i.received) > 0
-  //     );
-  // }
-
-
   getCurrentYearMonth() {
     const key = this.getMonthKey(); // e.g., budget-2025-10
     const parts = key.split('-');   // ["budget", "2025", "10"]
