@@ -348,6 +348,8 @@ export class Budget implements OnInit {
     this.loan = resetArray(this.loan);
     this.entertainment = resetArray(this.entertainment);
     this.childcare = resetArray(this.childcare);
+    this.hasEnteredAmount = false; 
+    this.amountLeft = 0; 
   }
 
   onStartPlanning() {
@@ -456,6 +458,8 @@ export class Budget implements OnInit {
         item.planned = '0.00';
       });
     });
+     this.hasEnteredAmount = false;
+     this.amountLeft = 0; 
     this.calculateTotals();
     this.saveBudget();
     alert("All planned amounts have been reset to ₹0.");
