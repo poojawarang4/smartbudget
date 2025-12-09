@@ -140,15 +140,34 @@ export class Budget implements OnInit {
     this.calculateSummaryPieChart();
   }
 
+  // checkIfAnyBudgetExists(): boolean {
+  //   for (let year = 2020; year <= 2030; year++) {
+  //     for (let m = 0; m < 12; m++) {
+  //       const key = `budget-${year}-${m}`;
+  //       if (localStorage.getItem(key)) return true;
+  //     }
+  //   }
+  //   return false;
+  // }
   checkIfAnyBudgetExists(): boolean {
-    for (let year = 2020; year <= 2030; year++) {
-      for (let m = 0; m < 12; m++) {
-        const key = `budget-${year}-${m}`;
-        if (localStorage.getItem(key)) return true;
+  for (let year = 2020; year <= 2030; year++) {
+    for (let m = 0; m < 12; m++) {
+      const key = `budget-${year}-${m}`;
+      const item = localStorage.getItem(key);
+
+      if (item) {
+        const budget = JSON.parse(item);
+
+        // Check if any value is > 0
+        const hasRealBudget = Object.values(budget).some(value => Number(value) > 0);
+
+        if (hasRealBudget) return true;
       }
     }
-    return false;
   }
+  return false;
+}
+
 
   startPlanningForNewMonth() {
     this.resetToZeroValues();
