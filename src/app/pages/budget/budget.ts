@@ -185,7 +185,7 @@ export class Budget implements OnInit {
     if (prevYear < 2020) return null;
 
     // Return correct localStorage key format
-    return `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
+    return `budget-${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
   }
 
   startPlanningForNewMonth() {
@@ -361,7 +361,7 @@ export class Budget implements OnInit {
 
   getMonthKey(): string {
     const month = (this.selectedMonthIndex + 1).toString().padStart(2, '0');
-    return `${this.selectedYear}-${month}`;
+    return `budget-${this.selectedYear}-${month}`;
   }
 
   loadBudgetForMonth(forceCreate: boolean = false) {
@@ -471,17 +471,22 @@ export class Budget implements OnInit {
         year--;
         if (year < 2020) break;
       }
-      const key = `${year}-${(month + 1).toString().padStart(2, '0')}`;
-      const saved = localStorage.getItem(key);
+
+      const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
+      const saved = localStorage.getItem(prevKey);
+
       if (saved) {
-        localStorage.setItem(this.getMonthKey(), saved);
+        const currentKey = this.getMonthKey();        // budget-2025-05
+        localStorage.setItem(currentKey, saved);      // Copy without modifying
         this.loadBudgetForMonth();
         return;
       }
+
       month--;
     }
-  }
 
+    console.warn("No previous budget found to copy.");
+  }
 
   findLatestBudget(): any {
     for (let year = 2030; year >= 2020; year--) {
@@ -509,8 +514,6 @@ export class Budget implements OnInit {
   }
 
   resetAllAmountsToZero() {
-    this.showResetPopup = false;
-
     const allGroups = [
       this.income, this.savings, this.giving, this.housing, this.tranportation,
       this.food, this.personal, this.health, this.insurance, this.loan,
@@ -524,17 +527,17 @@ export class Budget implements OnInit {
       });
     });
 
-    // VERY IMPORTANT FIX
-    this.hasEnteredAmount = false;  // 🟢 prevent "You've Got a Budget!"
+    this.hasEnteredAmount = false;
     this.amountLeft = 0;
     this.totalIncome = 0;
     this.totalPlannedExpenses = 0;
 
-    this.saveBudget();              // 🟢 Save reset values FIRST
-    this.calculateTotals();         // 🟢 Recalculate
+    this.saveBudget();
+    this.calculateTotals();
 
     this.showSuccessPopup("All amounts were reset to ₹0.");
   }
+
   showSuccessPopup(msg: string) {
     this.successMessage = msg;
     this.successPopup = true;
