@@ -348,8 +348,8 @@ export class Budget implements OnInit {
     this.loan = resetArray(this.loan);
     this.entertainment = resetArray(this.entertainment);
     this.childcare = resetArray(this.childcare);
-    this.hasEnteredAmount = false; 
-    this.amountLeft = 0; 
+    this.hasEnteredAmount = false;
+    this.amountLeft = 0;
   }
 
   onStartPlanning() {
@@ -448,20 +448,29 @@ export class Budget implements OnInit {
 
   resetAllAmountsToZero() {
     this.showResetPopup = false;
+
     const allGroups = [
       this.income, this.savings, this.giving, this.housing, this.tranportation,
       this.food, this.personal, this.health, this.insurance, this.loan,
       this.entertainment, this.childcare
     ];
+
     allGroups.forEach(group => {
       group.forEach(item => {
         item.planned = '0.00';
+        item.received = '0.00';
       });
     });
-     this.hasEnteredAmount = false;
-     this.amountLeft = 0; 
-    this.calculateTotals();
-    this.saveBudget();
+
+    // VERY IMPORTANT FIX
+    this.hasEnteredAmount = false;  // 🟢 prevent "You've Got a Budget!"
+    this.amountLeft = 0;
+    this.totalIncome = 0;
+    this.totalPlannedExpenses = 0;
+
+    this.saveBudget();              // 🟢 Save reset values FIRST
+    this.calculateTotals();         // 🟢 Recalculate
+
     alert("All planned amounts have been reset to ₹0.");
   }
 
