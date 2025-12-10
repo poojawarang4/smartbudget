@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, LOCALE_ID, OnInit } from '@angular/core';
 import { ChartOptions, ChartType, ChartData } from 'chart.js';
-import { NoBudget } from '../no-budget/no-budget';
 import { MonthService } from '../../../month.service';
 import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
 import { NgChartsModule } from 'ng2-charts';
@@ -127,16 +126,15 @@ export class Budget implements OnInit {
 
   ngOnInit() {
     // this.logPreviousMonthBudget();
-    //  this.checkPreviousMonthBudget();
-    this.monthService.selectedMonth$.subscribe(data => {
-      this.selectedMonth = this.getMonthName(data.monthIndex);
-    });
-this.monthService.month$.subscribe(({ month, year }) => {
-  this.selectedMonthIndex = month;
-  this.selectedYear = year;
+    this.checkPreviousMonthBudget();
+    this.monthService.selectedMonth$.subscribe(({ month, year }) => {
+      this.selectedMonthIndex = month;
+      this.selectedYear = year;
 
-  this.loadBudgetForMonth();  // inside this you already check previous month
-});
+      this.selectedMonth = this.getMonthName(month);
+
+      this.loadBudgetForMonth();
+    });
 
     this.allCategories = [
       this.savings || [],
@@ -210,7 +208,7 @@ this.monthService.month$.subscribe(({ month, year }) => {
   onMonthChanged(event: any) {
     this.selectedMonthIndex = event.monthIndex;
     this.selectedYear = event.year;
-this.logPreviousMonthBudget();
+    this.logPreviousMonthBudget();
     this.loadBudgetForMonth();
   }
   getMonthName(index: number) {
@@ -307,12 +305,6 @@ this.logPreviousMonthBudget();
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  // finishEdit(item: any, type: string) {
-  //   item["edit" + this.capitalize(type)] = false;
-  //   this.onAmountChange();
-  //   this.calculateSummaryPieChart();
-  //   this.saveBudget();  // ← Save month-wise
-  // }
   finishEdit(item: any, type: string) {
     // Convert empty, null or invalid value → 0
     if (
@@ -349,6 +341,7 @@ this.logPreviousMonthBudget();
     // Only show if at least one amount > 0
     return hasIncomeAmount || hasCategoryAmount;
   }
+
   onAmountChange() {
     const hasAmount =
       this.income.some(i => Number(i.planned) > 0 || Number(i.received) > 0) ||
@@ -360,12 +353,13 @@ this.logPreviousMonthBudget();
     this.calculateTotals();
   }
 
- getMonthKey() {
-  return this.getKey(this.selectedYear, this.selectedMonthIndex);
-}
-getKey(year: number, monthIndex: number) {
-  return `budget-${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
-}
+  getMonthKey() {
+    return this.getKey(this.selectedYear, this.selectedMonthIndex);
+  }
+
+  getKey(year: number, monthIndex: number) {
+    return `budget-${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
+  }
 
 
   loadBudgetForMonth(forceCreate: boolean = false) {
@@ -386,7 +380,7 @@ getKey(year: number, monthIndex: number) {
       this.entertainment = budget.entertainment;
       this.childcare = budget.childcare;
       this.budgetExistsForMonth = true;
-        this.logPreviousMonthBudget();
+      this.logPreviousMonthBudget();
     } else {
       this.resetToZeroValues();
       this.budgetExistsForMonth = forceCreate ? true : false;
@@ -552,19 +546,6 @@ getKey(year: number, monthIndex: number) {
     }, 2000); // auto-close after 2 sec
   }
 
-  // copyLastMonthBudget() {
-  //   const lastMonthIndex = this.selectedMonthIndex === 0 ? 11 : this.selectedMonthIndex - 1;
-  //   const lastMonthYear = this.selectedMonthIndex === 0 ? this.selectedYear - 1 : this.selectedYear;
-  //   const lastKey = `${lastMonthYear}-${(lastMonthIndex + 1).toString().padStart(2, '0')}`;
-  //   const lastData = localStorage.getItem(lastKey);
-  //   if (!lastData) {
-  //     console.warn("No previous budget found.");
-  //     return;
-  //   }
-  //   localStorage.setItem(this.getMonthKey(), lastData);
-  //   this.loadBudgetForMonth();
-  // }
-
   calculateSummaryPieChart() {
     const totalIncome = this.income.reduce((acc, item) => acc + Number(item.planned || 0), 0);
     if (totalIncome === 0) {
@@ -709,43 +690,43 @@ getKey(year: number, monthIndex: number) {
       })
       .join('\n');
   }
-checkPreviousMonthBudget() {
-  let prevMonth = this.selectedMonthIndex - 1;
-  let prevYear = this.selectedYear;
+  checkPreviousMonthBudget() {
+    let prevMonth = this.selectedMonthIndex - 1;
+    let prevYear = this.selectedYear;
 
-  if (prevMonth < 0) {
-    prevMonth = 11;
-    prevYear--;
+    if (prevMonth < 0) {
+      prevMonth = 11;
+      prevYear--;
+    }
+
+    const prevKey = this.getKey(prevYear, prevMonth);
+
+    this.hasLatestBudget = !!localStorage.getItem(prevKey);
+
+    console.log("Checking previous month:", prevKey, "Exists?", this.hasLatestBudget);
   }
 
-  const prevKey = this.getKey(prevYear, prevMonth);
+  logPreviousMonthBudget() {
+    let year = this.selectedYear;
+    let month = this.selectedMonthIndex - 1;   // previous month index
 
-  this.hasLatestBudget = !!localStorage.getItem(prevKey);
+    // Handle year change
+    if (month < 0) {
+      month = 11;
+      year--;
+    }
 
-  console.log("Checking previous month:", prevKey, "Exists?", this.hasLatestBudget);
-}
+    const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
+    console.log("Previous Month Key:", prevKey);
 
-logPreviousMonthBudget() {
-  let year = this.selectedYear;
-  let month = this.selectedMonthIndex - 1;   // previous month index
+    const prevBudget = localStorage.getItem(prevKey);
 
-  // Handle year change
-  if (month < 0) {
-    month = 11;
-    year--;
+    if (prevBudget) {
+      console.log("Previous Month Budget:", JSON.parse(prevBudget));
+    } else {
+      console.warn("No budget found for previous month.");
+      this.hasLatestBudget = true
+    }
   }
-
-  const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
-  console.log("Previous Month Key:", prevKey);
-
-  const prevBudget = localStorage.getItem(prevKey);
-
-  if (prevBudget) {
-    console.log("Previous Month Budget:", JSON.parse(prevBudget));
-  } else {
-    console.warn("No budget found for previous month.");
-    this.hasLatestBudget = true
-  }
-}
 
 }
