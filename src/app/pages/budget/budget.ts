@@ -126,16 +126,18 @@ export class Budget implements OnInit {
   constructor(private monthService: MonthService, private dialog: MatDialog) { }
 
   ngOnInit() {
-    // this.checkLatestBudget();
+    // this.logPreviousMonthBudget();
+    //  this.checkPreviousMonthBudget();
     this.monthService.selectedMonth$.subscribe(data => {
       this.selectedMonth = this.getMonthName(data.monthIndex);
     });
-    this.hasLatestBudget = this.checkIfAnyBudgetExists();
-    this.monthService.selectedMonth$.subscribe(data => {
-      this.selectedMonthIndex = data.monthIndex;
-      this.selectedYear = data.year;
-      this.loadBudgetForMonth();
-    });
+this.monthService.month$.subscribe(({ month, year }) => {
+  this.selectedMonthIndex = month;
+  this.selectedYear = year;
+
+  this.loadBudgetForMonth();  // inside this you already check previous month
+});
+
     this.allCategories = [
       this.savings || [],
       this.giving || [],
@@ -175,7 +177,7 @@ export class Budget implements OnInit {
     const { year, month } = this.getCurrentYearMonth();
 
     let prevYear = year;
-    let prevMonth = month - 1; // month is 1–12 here
+    let prevMonth = this.selectedMonthIndex - 1; // month is 1–12 here
 
     if (prevMonth === 0) {
       prevYear--;
@@ -206,10 +208,9 @@ export class Budget implements OnInit {
   }
 
   onMonthChanged(event: any) {
-    //  this.checkLatestBudget();
     this.selectedMonthIndex = event.monthIndex;
     this.selectedYear = event.year;
-
+this.logPreviousMonthBudget();
     this.loadBudgetForMonth();
   }
   getMonthName(index: number) {
@@ -359,10 +360,13 @@ export class Budget implements OnInit {
     this.calculateTotals();
   }
 
-  getMonthKey(): string {
-    const month = (this.selectedMonthIndex + 1).toString().padStart(2, '0');
-    return `budget-${this.selectedYear}-${month}`;
-  }
+ getMonthKey() {
+  return this.getKey(this.selectedYear, this.selectedMonthIndex);
+}
+getKey(year: number, monthIndex: number) {
+  return `budget-${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
+}
+
 
   loadBudgetForMonth(forceCreate: boolean = false) {
     const key = this.getMonthKey()
@@ -382,6 +386,7 @@ export class Budget implements OnInit {
       this.entertainment = budget.entertainment;
       this.childcare = budget.childcare;
       this.budgetExistsForMonth = true;
+        this.logPreviousMonthBudget();
     } else {
       this.resetToZeroValues();
       this.budgetExistsForMonth = forceCreate ? true : false;
@@ -704,5 +709,43 @@ export class Budget implements OnInit {
       })
       .join('\n');
   }
+checkPreviousMonthBudget() {
+  let prevMonth = this.selectedMonthIndex - 1;
+  let prevYear = this.selectedYear;
+
+  if (prevMonth < 0) {
+    prevMonth = 11;
+    prevYear--;
+  }
+
+  const prevKey = this.getKey(prevYear, prevMonth);
+
+  this.hasLatestBudget = !!localStorage.getItem(prevKey);
+
+  console.log("Checking previous month:", prevKey, "Exists?", this.hasLatestBudget);
+}
+
+logPreviousMonthBudget() {
+  let year = this.selectedYear;
+  let month = this.selectedMonthIndex - 1;   // previous month index
+
+  // Handle year change
+  if (month < 0) {
+    month = 11;
+    year--;
+  }
+
+  const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
+  console.log("Previous Month Key:", prevKey);
+
+  const prevBudget = localStorage.getItem(prevKey);
+
+  if (prevBudget) {
+    console.log("Previous Month Budget:", JSON.parse(prevBudget));
+  } else {
+    console.warn("No budget found for previous month.");
+    this.hasLatestBudget = true
+  }
+}
 
 }

@@ -3,19 +3,15 @@ import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class MonthService {
-
-  // Default → full month name
-  // private currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
-
-  // private selectedMonthSource = new BehaviorSubject<string>(this.getCurrentMonth());
-  private monthSubject = new BehaviorSubject<{monthIndex: number, year: number}>({
-  monthIndex: new Date().getMonth(),
-  year: new Date().getFullYear()
-});
+  private monthSubject = new BehaviorSubject<{ monthIndex: number, year: number }>({
+    monthIndex: new Date().getMonth(),
+    year: new Date().getFullYear()
+  });
   selectedMonth$ = this.monthSubject.asObservable();
-
-  updateMonth(monthIndex: number, year: number) {
-    this.monthSubject.next({monthIndex,year});
+  private monthSource = new BehaviorSubject({ month: new Date().getMonth(), year: new Date().getFullYear() });
+  month$ = this.monthSource.asObservable();
+  updateMonth(month: number, year: number) {
+    this.monthSource.next({ month, year });
   }
   getCurrentMonth() {
     const monthNames = [
