@@ -126,14 +126,12 @@ export class Budget implements OnInit {
 
   ngOnInit() {
     // this.logPreviousMonthBudget();
-    this.checkPreviousMonthBudget();
     this.monthService.selectedMonth$.subscribe(({ month, year }) => {
       this.selectedMonthIndex = month;
       this.selectedYear = year;
-
       this.selectedMonth = this.getMonthName(month);
-
       this.loadBudgetForMonth();
+      this.checkPreviousMonthBudget();
     });
 
     this.allCategories = [
@@ -205,12 +203,6 @@ export class Budget implements OnInit {
     return months[index];
   }
 
-  onMonthChanged(event: any) {
-    this.selectedMonthIndex = event.monthIndex;
-    this.selectedYear = event.year;
-    this.logPreviousMonthBudget();
-    this.loadBudgetForMonth();
-  }
   getMonthName(index: number) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -237,11 +229,7 @@ export class Budget implements OnInit {
   }
 
   calculateTotals() {
-
-    // 1. Total income
     this.totalIncome = this.income.reduce((sum, i) => sum + Number(i.planned), 0);
-
-    // 2. Total category planned expenses
     const allCategories = [
       ...this.housing,
       ...this.tranportation,
@@ -275,21 +263,16 @@ export class Budget implements OnInit {
   }
 
   editAmount(item: any, field: 'planned' | 'received', isIncome: boolean) {
-
-    // Recalculate income
     this.incomeTotal = this.income.reduce(
       (sum, inc) => sum + Number(inc.planned || 0),
       0
     );
-
-    // Block category editing before income
     if (!isIncome && this.incomeTotal <= 0) {
       this.leftMessage = "Please Enter Income First";
       this.showLeftToast = true;
       setTimeout(() => (this.showLeftToast = false), 2000);
       return;
     }
-
     // Turn ON edit mode
     const editKey = 'edit' + this.capitalize(field);
     item[editKey] = true;
@@ -348,7 +331,6 @@ export class Budget implements OnInit {
       this.allCategories.some(cat =>
         cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
       );
-
     this.hasEnteredAmount = hasAmount;
     this.calculateTotals();
   }
@@ -580,11 +562,9 @@ export class Budget implements OnInit {
         values.push(sum);
       }
     });
-
     const percentages = values.map(v => +((v / totalIncome) * 100).toFixed(1));
     const totalPercent = percentages.reduce((a, b) => a + b, 0);
     const remainingPercent = +(100 - totalPercent).toFixed(1);
-
     // INTERNAL CHART DATA
     const chartData = [...percentages, remainingPercent];
 
@@ -595,7 +575,6 @@ export class Budget implements OnInit {
 
     // Labels include remaining but we hide it in UI
     this.pieChartLabels = [...labels, "Remaining"];
-
     this.pieChartData = {
       labels: this.pieChartLabels,
       datasets: [
@@ -665,12 +644,10 @@ export class Budget implements OnInit {
 
                 breakdown += `\n• ${item.name} – ₹${formattedAmt} (${percentInsideCategory}%)`;
               });
-
               return breakdown;
             }
           }
         }
-
       }
     };
   }
@@ -680,7 +657,6 @@ export class Budget implements OnInit {
       .map(item => {
         const amt = Number(item.planned || 0);
         const percent = totalCategoryAmount > 0 ? ((amt / totalCategoryAmount) * 100).toFixed(1) : 0;
-
         const formattedAmt = new Intl.NumberFormat('en-IN', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
@@ -690,6 +666,7 @@ export class Budget implements OnInit {
       })
       .join('\n');
   }
+
   checkPreviousMonthBudget() {
     let prevMonth = this.selectedMonthIndex - 1;
     let prevYear = this.selectedYear;
@@ -723,9 +700,10 @@ export class Budget implements OnInit {
 
     if (prevBudget) {
       console.log("Previous Month Budget:", JSON.parse(prevBudget));
+      this.hasLatestBudget = true;
     } else {
       console.warn("No budget found for previous month.");
-      this.hasLatestBudget = true
+      this.hasLatestBudget = false;
     }
   }
 
