@@ -131,6 +131,7 @@ export class Budget implements OnInit {
   hasLatestBudget: boolean = false;
   successPopup = false;
   successMessage = "";
+  hasAnyBudget = false;
 
   income = [
     { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
@@ -204,7 +205,7 @@ export class Budget implements OnInit {
   constructor(private monthService: MonthService, private dialog: MatDialog, private budgetShared: BudgetSharedService) { }
 
   ngOnInit() {
-    // this.logPreviousMonthBudget();
+    this.hasAnyBudget = this.checkIfAnyBudgetExists();
     this.monthService.selectedMonth$.subscribe(({ month, year }) => {
       this.selectedMonthIndex = month;
       this.selectedYear = year;
@@ -212,7 +213,7 @@ export class Budget implements OnInit {
       this.loadBudgetForMonth();
       this.loadTransactions();
       this.loadSummary();
-      this.checkPreviousMonthBudget();
+      this.hasAnyBudget = this.checkIfAnyBudgetExists();
     });
 
     this.allCategories = [
@@ -236,7 +237,8 @@ export class Budget implements OnInit {
   checkIfAnyBudgetExists(): boolean {
     for (let year = 2020; year <= 2030; year++) {
       for (let m = 0; m < 12; m++) {
-        const key = `budget-${year}-${m}`;
+        // const key = `budget-${year}-${m}`;
+        const key = `budget-${year}-${(m + 1).toString().padStart(2, '0')}`;
         if (localStorage.getItem(key)) return true;
       }
     }
@@ -450,8 +452,6 @@ export class Budget implements OnInit {
       this.entertainment = budget.entertainment;
       this.childcare = budget.childcare;
       this.budgetExistsForMonth = true;
-
-      // this.logPreviousMonthBudget();
     } else {
       this.resetToZeroValues();
       this.budgetExistsForMonth = forceCreate ? true : false;
@@ -552,30 +552,30 @@ export class Budget implements OnInit {
   }
 
   copyLatestBudgetForMonth() {
-    let year = this.selectedYear;
-    let month = this.selectedMonthIndex - 1;
+    let latestKey: string | null = null;
 
-    while (year >= 2020) {
-      if (month < 0) {
-        month = 11;
-        year--;
-        if (year < 2020) break;
+    // find latest budget (newest year+month)
+    for (let year = 2030; year >= 2020; year--) {
+      for (let m = 11; m >= 0; m--) {
+        const key = `budget-${year}-${(m + 1).toString().padStart(2, '0')}`;
+        if (localStorage.getItem(key)) {
+          latestKey = key;
+          break;
+        }
       }
-
-      const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
-      const saved = localStorage.getItem(prevKey);
-
-      if (saved) {
-        const currentKey = this.getMonthKey();        // budget-2025-05
-        localStorage.setItem(currentKey, saved);      // Copy without modifying
-        this.loadBudgetForMonth();
-        return;
-      }
-
-      month--;
+      if (latestKey) break;
     }
-
-    console.warn("No previous budget found to copy.");
+    if (!latestKey) {
+      console.warn('No previous budget found');
+      return;
+    }
+    // copy into current month
+    const latestBudget = localStorage.getItem(latestKey);
+    const currentKey = this.getMonthKey();
+    localStorage.setItem(currentKey, latestBudget!);
+    // reload UI
+    this.loadBudgetForMonth(true);
+    this.showSuccessPopup('Latest budget copied successfully');
   }
 
   findLatestBudget(): any {
@@ -615,15 +615,12 @@ export class Budget implements OnInit {
         item.received = '0.00';
       });
     });
-
     this.hasEnteredAmount = false;
     this.amountLeft = 0;
     this.totalIncome = 0;
     this.totalPlannedExpenses = 0;
-
     this.saveBudget();
     this.calculateTotals();
-
     this.showSuccessPopup("All amounts were reset to ₹0.");
   }
 
@@ -775,37 +772,17 @@ export class Budget implements OnInit {
       .join('\n');
   }
 
-  checkPreviousMonthBudget() {
-    let prevMonth = this.selectedMonthIndex - 1;
-    let prevYear = this.selectedYear;
+  // checkPreviousMonthBudget() {
+  //   let prevMonth = this.selectedMonthIndex - 1;
+  //   let prevYear = this.selectedYear;
 
-    if (prevMonth < 0) {
-      prevMonth = 11;
-      prevYear--;
-    }
-    const prevKey = this.getKey(prevYear, prevMonth);
-    this.hasLatestBudget = !!localStorage.getItem(prevKey);
-  }
-
-  logPreviousMonthBudget() {
-    let year = this.selectedYear;
-    let month = this.selectedMonthIndex - 1;   // previous month index
-
-    // Handle year change
-    if (month < 0) {
-      month = 11;
-      year--;
-    }
-
-    const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
-    const prevBudget = localStorage.getItem(prevKey);
-    if (prevBudget) {
-      this.hasLatestBudget = true;
-    } else {
-      console.warn("No budget found for previous month.");
-      this.hasLatestBudget = false;
-    }
-  }
+  //   if (prevMonth < 0) {
+  //     prevMonth = 11;
+  //     prevYear--;
+  //   }
+  //   const prevKey = this.getKey(prevYear, prevMonth);
+  //   this.hasLatestBudget = !!localStorage.getItem(prevKey);
+  // }
 
   openPopup(type: 'income' | 'expense') {
     this.popupType = type;
@@ -846,14 +823,11 @@ export class Budget implements OnInit {
     data.transactions.push(newItem);
     if (this.popupType === 'income') {
       const incomeRow = this.income.find(i => i.name === this.form.category);
-
       if (incomeRow) {
         const updated =
           Number(incomeRow.received || 0) + Number(this.form.amount || 0);
-
         incomeRow.received = updated.toFixed(2); // ✅ string
       }
-
     }
     // update summary
     if (this.popupType === 'expense') {
@@ -1003,11 +977,9 @@ export class Budget implements OnInit {
       const categoryGroup = this.allCategories.find(group =>
         group.some(item => item.name === t.category)
       );
-
       const categoryItem = categoryGroup?.find(
         item => item.name === t.category
       );
-
       if (categoryItem) {
         const current = Number(categoryItem.received || 0);
         categoryItem.received = (current + t.amount).toFixed(2);
