@@ -1,5 +1,20 @@
 <div class="header">
-  <h2>Smartbudget</h2>
+  <div class="header-left">
+    <h2>Smartbudget</h2>
+    <div *ngIf="shouldShow" class="budget-status-box">
+      <h3 *ngIf="amountLeft > 0 && hasEnteredAmount" class="left-budget">
+        Amount left to budget: Rs. {{ amountLeft | number:'1.2-2' }}
+      </h3>
+
+      <h3 *ngIf="amountLeft === 0 && hasEnteredAmount" class="balanced">
+        🎉 You've Got a Budget!
+      </h3>
+
+      <h3 *ngIf="amountLeft < 0 && hasEnteredAmount" class="over-budget">
+        Amount over budget: Rs. {{ amountLeft * -1 | number:'1.2-2' }}
+      </h3>
+    </div>
+  </div>
 
   <div class="month-switch">
     <span class="arrow" (click)="goToPreviousMonth()">&#10094;</span>

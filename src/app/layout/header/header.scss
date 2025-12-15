@@ -157,3 +157,29 @@
     padding: 8px;
   }
 }
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget-status-box h3 {
+  margin: 0;
+  padding: 0;
+}
+
+.left-budget {
+  color: #e67e22;
+  font-weight: 600;
+}
+
+.balanced {
+  color: #27ae60;
+  font-weight: 700;
+}
+
+.over-budget {
+  color: #c0392b;
+  font-weight: 600;
+}

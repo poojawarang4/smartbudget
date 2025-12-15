@@ -8,9 +8,26 @@ import { NgChartsModule } from 'ng2-charts';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import localeIn from '@angular/common/locales/en-IN';
 import { registerLocaleData } from '@angular/common';
+import { BudgetSharedService } from '../../layout/budget-shared.service';
 
 registerLocaleData(localeIn);
 
+interface Transaction {
+  id: string;
+  icon: string,
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  date: string;
+  description: string;
+  month: number; // 0–11
+  year: number;
+}
+interface SummaryItem {
+  allotted: number;
+  spent: number;
+  remain: number;
+}
 @Component({
   selector: 'app-budget',
   imports: [CommonModule, FormsModule, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule],
@@ -23,6 +40,66 @@ registerLocaleData(localeIn);
 
 })
 export class Budget implements OnInit {
+  showPopup = false;
+  popupType: 'income' | 'expense' = 'expense';
+
+  incomeCategories: string[] = [
+    "Salary 1",
+    "Salary 2",
+    "Rental Income",
+    "Investment Income",
+    "Other Income"
+  ];
+
+  transactions: Transaction[] = [];
+
+  summary: Record<string, SummaryItem> = {};
+
+  expenseCategories: any[] = [
+    { name: "Savings" },
+    { name: "Giving" },
+    {
+      name: "Housing",
+      sub: [
+        "Mortgage",
+        "Rent",
+        "Water",
+        "Society Maintenance",
+        "Gas",
+        "Electricity",
+        "Trash",
+        "Cable",
+        "Wi-Fi",
+        "Phone"
+      ]
+    },
+    {
+      name: "Transportation",
+      sub: ["Fuel", "Insurance", "Maintenance"]
+    },
+    {
+      name: "Food",
+      sub: ["Groceries", "Restaurants"]
+    },
+    { name: "Personal" },
+    { name: "Health" },
+    {
+      name: "Insurance",
+      sub: ["Health", "Life"]
+    },
+    { name: "Loan Repayment" },
+    { name: "Entertainment" },
+    { name: "Child Care" }
+  ];
+
+  selectedCategoryList: string[] = [];
+
+  form = {
+    category: '',
+    amount: 0,
+    date: '',
+    description: ''
+  };
   isOpen = false;
   public categoryDisplay: any[] = [];
   chartColors = [
@@ -111,6 +188,7 @@ export class Budget implements OnInit {
   ];
   public pieChartOptions: any = {
     plugins: {
+
       legend: { display: false }  // ❌ hide default legend
     }
   };
@@ -119,10 +197,11 @@ export class Budget implements OnInit {
     labels: [],
     datasets: [{ data: [] }]
   };
+  activeTab: 'summary' | 'transactions' = 'summary';
 
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
-  constructor(private monthService: MonthService, private dialog: MatDialog) { }
+  constructor(private monthService: MonthService, private dialog: MatDialog, private budgetShared: BudgetSharedService) { }
 
   ngOnInit() {
     // this.logPreviousMonthBudget();
@@ -131,6 +210,8 @@ export class Budget implements OnInit {
       this.selectedYear = year;
       this.selectedMonth = this.getMonthName(month);
       this.loadBudgetForMonth();
+      this.loadTransactions();
+      this.loadSummary();
       this.checkPreviousMonthBudget();
     });
 
@@ -148,6 +229,8 @@ export class Budget implements OnInit {
       this.childcare || []
     ];
     this.calculateSummaryPieChart();
+    this.loadTransactions();
+    this.loadSummary();
   }
 
   checkIfAnyBudgetExists(): boolean {
@@ -326,13 +409,18 @@ export class Budget implements OnInit {
   }
 
   onAmountChange() {
-    const hasAmount =
-      this.income.some(i => Number(i.planned) > 0 || Number(i.received) > 0) ||
-      this.allCategories.some(cat =>
-        cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
-      );
-    this.hasEnteredAmount = hasAmount;
     this.calculateTotals();
+
+    this.hasEnteredAmount =
+      this.totalIncome > 0 || this.totalPlannedExpenses > 0;
+
+    this.budgetShared.updateBudgetInfo({
+      totalIncome: this.totalIncome,
+      totalPlannedExpenses: this.totalPlannedExpenses,
+      amountLeft: this.amountLeft,
+      hasEnteredAmount: this.hasEnteredAmount,
+      shouldShowSummaryBox: this.shouldShowSummaryBox()
+    });
   }
 
   getMonthKey() {
@@ -362,13 +450,34 @@ export class Budget implements OnInit {
       this.entertainment = budget.entertainment;
       this.childcare = budget.childcare;
       this.budgetExistsForMonth = true;
-      this.logPreviousMonthBudget();
+
+      // this.logPreviousMonthBudget();
     } else {
       this.resetToZeroValues();
       this.budgetExistsForMonth = forceCreate ? true : false;
     }
+    this.rebuildAllCategories();
+    this.loadTransactions();
+    this.loadSummary();
+    this.updateExpenseReceivedFromTransactions();
     this.onAmountChange();
   }
+  rebuildAllCategories() {
+    this.allCategories = [
+      this.savings,
+      this.giving,
+      this.housing,
+      this.tranportation,
+      this.food,
+      this.personal,
+      this.health,
+      this.insurance,
+      this.loan,
+      this.entertainment,
+      this.childcare
+    ];
+  }
+
 
   resetToZeroValues() {
     const resetArray = (arr: any[]) =>
@@ -485,7 +594,6 @@ export class Budget implements OnInit {
       width: '500px'
     });
     dialogRef.afterClosed().subscribe((result) => {
-      console.log('Popup closed:', result);
       if (result === 'zero') {
         this.resetAllAmountsToZero();
       } else if (result === 'copy') {
@@ -675,12 +783,8 @@ export class Budget implements OnInit {
       prevMonth = 11;
       prevYear--;
     }
-
     const prevKey = this.getKey(prevYear, prevMonth);
-
     this.hasLatestBudget = !!localStorage.getItem(prevKey);
-
-    console.log("Checking previous month:", prevKey, "Exists?", this.hasLatestBudget);
   }
 
   logPreviousMonthBudget() {
@@ -694,17 +798,221 @@ export class Budget implements OnInit {
     }
 
     const prevKey = `budget-${year}-${(month + 1).toString().padStart(2, '0')}`;
-    console.log("Previous Month Key:", prevKey);
-
     const prevBudget = localStorage.getItem(prevKey);
-
     if (prevBudget) {
-      console.log("Previous Month Budget:", JSON.parse(prevBudget));
       this.hasLatestBudget = true;
     } else {
       console.warn("No budget found for previous month.");
       this.hasLatestBudget = false;
     }
+  }
+
+  openPopup(type: 'income' | 'expense') {
+    this.popupType = type;
+    this.showPopup = true;
+    this.onTypeChange();
+  }
+
+  closePopup() {
+    this.showPopup = false;
+    this.form = { category: '', amount: 0, date: '', description: '' };
+  }
+
+  onTypeChange() {
+    if (this.popupType === "income") {
+      this.selectedCategoryList = this.incomeCategories;
+    } else {
+      this.selectedCategoryList = this.expenseCategories.flatMap(item =>
+        item.sub ? [item.name, ...item.sub] : [item.name]
+      );
+    }
+  }
+
+  submitTransaction() {
+    const mainCategory = this.getMainCategory(this.form.category);
+    const newItem: Transaction = {
+      id: Date.now().toString(),
+      icon: this.getIcon(mainCategory),   // ✅ FIX ADDED
+      type: this.popupType,
+      category: this.form.category,
+      amount: Number(this.form.amount),
+      date: this.form.date,
+      description: this.form.description,
+      month: this.selectedMonthIndex,
+      year: this.selectedYear
+    };
+    const data = JSON.parse(localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}');
+    // save transaction
+    data.transactions.push(newItem);
+    if (this.popupType === 'income') {
+      const incomeRow = this.income.find(i => i.name === this.form.category);
+
+      if (incomeRow) {
+        const updated =
+          Number(incomeRow.received || 0) + Number(this.form.amount || 0);
+
+        incomeRow.received = updated.toFixed(2); // ✅ string
+      }
+
+    }
+    // update summary
+    if (this.popupType === 'expense') {
+      if (!data.summary[mainCategory]) {
+        data.summary[mainCategory] = {
+          allotted: 0,
+          spent: 0,
+          remain: 0
+        };
+      }
+
+      data.summary[mainCategory].spent += newItem.amount;
+      data.summary[mainCategory].remain =
+        data.summary[mainCategory].allotted - data.summary[mainCategory].spent;
+    }
+    // SAVE
+    localStorage.setItem('smartbudget-data', JSON.stringify(data));
+    // reload
+    this.saveBudget();
+    this.onAmountChange();
+    this.loadTransactions();
+    this.loadSummary();
+    this.updateExpenseReceivedFromTransactions();
+    this.closePopup();
+  }
+
+  loadTransactions() {
+    const data = JSON.parse(localStorage.getItem('smartbudget-data') || '{"transactions":[]}');
+    this.transactions = data.transactions;
+    this.transactions = data.transactions
+      .filter((t: Transaction) =>
+        t.month === this.selectedMonthIndex &&
+        t.year === this.selectedYear
+      )
+      .sort((a: Transaction, b: Transaction) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+  }
+
+  loadSummary() {
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
+    );
+
+    const monthTransactions = data.transactions.filter(
+      (t: Transaction) =>
+        t.type === 'expense' &&
+        t.month === this.selectedMonthIndex &&
+        t.year === this.selectedYear
+    );
+
+    const summary: Record<string, SummaryItem> = {};
+    monthTransactions.forEach((t: Transaction) => {
+      const main = this.getMainCategory(t.category);
+
+      if (!summary[main]) {
+        summary[main] = { allotted: 0, spent: 0, remain: 0 };
+      }
+
+      summary[main].spent += t.amount;
+    });
+
+    // Attach allotted from budget
+    Object.keys(summary).forEach(cat => {
+      const group = this.allCategories.find(g =>
+        g.some(i => i.name === cat)
+      );
+      const allotted =
+        group?.reduce((sum, i) => sum + Number(i.planned || 0), 0) || 0;
+      summary[cat].allotted = allotted;
+      summary[cat].remain = allotted - summary[cat].spent;
+    });
+
+    this.summary = summary;
+  }
+
+  updateSummary(expense: any) {
+    const data = JSON.parse(localStorage.getItem('smartbudget-data') || '{"summary":{}}');
+    if (!data.summary[expense.category]) {
+      data.summary[expense.category] = {
+        allotted: 0,     // or your planned value
+        spent: 0,
+        remain: 0
+      };
+    }
+    // Update spent
+    data.summary[expense.category].spent += expense.amount;
+    // Recalculate remain
+    data.summary[expense.category].remain =
+      data.summary[expense.category].allotted -
+      data.summary[expense.category].spent;
+    localStorage.setItem('smartbudget-data', JSON.stringify(data));
+    this.summary = data.summary;  // Refresh UI
+  }
+
+  getIcon(category: string) {
+    const map: any = {
+      Food: "🍽️",
+      Grocery: "🛒",
+      Personal: "🧍",
+      Entertainment: "🎬",
+      Savings: "💰",
+      Housing: "🏠",
+      Transportation: "🚗",
+      Health: "⚕️",
+      Giving: "🎁"
+    };
+    return map[category] || "💡";
+  }
+
+  getMainCategory(category: string): string {
+    for (let item of this.expenseCategories) {
+      // if main category matches
+      if (item.name === category) return item.name;
+
+      // if subcategory matches, return main category
+      if (item.sub && item.sub.includes(category)) {
+        return item.name;
+      }
+    }
+    return category; // for income or unmatched categories
+  }
+
+  updateExpenseReceivedFromTransactions() {
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
+    );
+
+    // 1️⃣ Reset all expense received values
+    this.allCategories.forEach(group => {
+      group.forEach(item => {
+        item.received = '0.00';
+      });
+    });
+
+    // 2️⃣ Filter current month expenses
+    const monthExpenses: Transaction[] = data.transactions.filter(
+      (t: Transaction) =>
+        t.type === 'expense' &&
+        t.month === this.selectedMonthIndex &&
+        t.year === this.selectedYear
+    );
+
+    // 3️⃣ Add amounts to EXACT matching sub-category
+    monthExpenses.forEach((t: Transaction) => {
+
+      const categoryGroup = this.allCategories.find(group =>
+        group.some(item => item.name === t.category)
+      );
+
+      const categoryItem = categoryGroup?.find(
+        item => item.name === t.category
+      );
+
+      if (categoryItem) {
+        const current = Number(categoryItem.received || 0);
+        categoryItem.received = (current + t.amount).toFixed(2);
+      }
+    });
   }
 
 }

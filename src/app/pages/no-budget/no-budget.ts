@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { MonthService } from '../../../month.service';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './no-budget.html',
   styleUrl: './no-budget.scss',
 })
-export class NoBudget {
+export class NoBudget implements OnInit {
   selectedMonth: string = '';
   @Output() startPlanning = new EventEmitter<void>();
   @Output() copyLatestBudget = new EventEmitter<void>();

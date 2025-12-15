@@ -22,7 +22,6 @@ export class ResetBudgetPopupComponent {
   }
 
   confirm() {
-    console.log("this.selectedOption",this.selectedOption)
     this.dialogRef.close(this.selectedOption);
   }
 }

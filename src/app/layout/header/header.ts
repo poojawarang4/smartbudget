@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MonthService } from '../../../month.service';
+import { BudgetSharedService } from '../budget-shared.service';
 
 @Component({
   selector: 'app-header',
@@ -8,7 +9,7 @@ import { MonthService } from '../../../month.service';
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class Header {
+export class Header implements OnInit {
 
   months = [
     { index: 0, name: 'January' },
@@ -24,20 +25,47 @@ export class Header {
     { index: 10, name: 'November' },
     { index: 11, name: 'December' }
   ];
-
+  allCategories: any[][] = [];
   selectedMonthIndex = new Date().getMonth();
   selectedYear = new Date().getFullYear();
   isMonthPopoverOpen = false;
   visibleMonths: any[] = [];
   popupCenterMonthIndex: number = this.selectedMonthIndex;
   popupCenterYear: number = this.selectedYear;
-
+  amountLeft: number = 0;
+  hasEnteredAmount = false;
+  income = [
+    { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Salary 2', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Rental Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Investment Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Other Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+  ];
+  shouldShow: boolean = false;
+  totalIncome: any;
+  constructor(private monthService: MonthService, private budgetShared: BudgetSharedService) { }
 
   ngOnInit() {
     this.updateVisibleMonths();
+    this.budgetShared.budgetInfo$.subscribe(info => {
+      this.amountLeft = info.amountLeft;
+      this.totalIncome = info.totalIncome;
+      this.hasEnteredAmount = info.hasEnteredAmount;
+      this.shouldShow = info.shouldShowSummaryBox;
+    });
   }
 
-  constructor(private monthService: MonthService) { }
+  shouldShowSummaryBox(): boolean {
+    const hasIncomeAmount =
+      this.income.some(i => Number(i.planned) > 0 || Number(i.received) > 0);
+
+    const hasCategoryAmount =
+      this.allCategories.some(cat =>
+        cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
+      );
+    return hasIncomeAmount || hasCategoryAmount;
+  }
+
 
   toggleMonthPopover() {
     this.isMonthPopoverOpen = !this.isMonthPopoverOpen;

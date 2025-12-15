@@ -14,496 +14,543 @@
     <div class="layout">
 
       <!-- LEFT SIDE (SCROLL AREA) -->
-      <div class="left-scroll scroll-area">
-        <!-- INCOME -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Income</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
+      <div class="left-section card">
+        <div class="left-scroll scroll-area">
+          <!-- INCOME -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Income</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
 
-            <tr *ngFor="let item of income">
-              <td>{{ item.name }}</td>
+              <tr *ngFor="let item of income">
+                <td>{{ item.name }}</td>
 
-              <!-- Planned Editable -->
-              <td>
-                <!-- DISPLAY MODE -->
+                <!-- Planned Editable -->
+                <td>
+                  <!-- DISPLAY MODE -->
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', true)">
+                    ₹ {{ item.planned | currency:'INR'}}
+                  </span>
+
+                  <!-- EDIT MODE -->
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
+                <!-- Received Editable -->
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Savings -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Savings</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
+
+              <tr *ngFor="let item of savings">
+                <td>{{ item.name }}</td>
+
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
+
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
+
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Giving -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Giving</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
+
+              <tr *ngFor="let item of giving">
+                <td>{{ item.name }}</td>
+
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
+
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
+
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Housing -->
+          <div class="accordion-item" [class.open]="isOpen">
+            <div class="accordion-header" (click)="toggle()">
+              <h5>Housing</h5>
+
+              <span class="arrow" [class.rotate]="isOpen">
+                ▼
+              </span>
+            </div>
+
+            <div class="accordion-body">
+
+              <!-- TABLE HEADER -->
+              <div class="row-head">
+                <span></span>
+                <span>Planned</span>
+                <span>Received</span>
+              </div>
+
+              <!-- TABLE ROWS -->
+              <div class="row-item" *ngFor="let item of housing">
+                <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', true)">
-                  ₹ {{ item.planned | number:'1.2-2'}}
-                </span>
-
-                <!-- EDIT MODE -->
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
-              <!-- Received Editable -->
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received',true)">
-                  ₹ {{ item.received | number:'1.2-2' }}
-                </span>
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>s
-
-        <!-- Savings -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Savings</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
-
-            <tr *ngFor="let item of savings">
-              <td>{{ item.name }}</td>
-
-              <td>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
+                  (click)="editAmount(item, 'planned',false)">
                   ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
 
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
+                <span *ngIf="!item.editReceived" class="amount clickable-amount">
                   ₹ {{ item.received | number:'1.2-2' }}
                 </span>
+              </div>
+            </div>
+          </div>
 
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>
+          <!-- Transportation -->
+          <div class="accordion-item" [class.open]="isExp">
+            <div class="accordion-header" (click)="togglet()">
+              <h5>Transportation</h5>
 
-        <!-- Giving -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Giving</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
+              <span class="arrow" [class.rotate]="isExp">
+                ▼
+              </span>
+            </div>
 
-            <tr *ngFor="let item of giving">
-              <td>{{ item.name }}</td>
+            <div class="accordion-body">
 
-              <td>
+              <!-- TABLE HEADER -->
+              <div class="row-head">
+                <span></span>
+                <span>Planned</span>
+                <span>Received</span>
+              </div>
+
+              <!-- TABLE ROWS -->
+              <div class="row-item" *ngFor="let item of tranportation">
+                <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
+                  (click)="editAmount(item, 'planned',false)">
                   ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
 
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
+                <span *ngIf="!item.editReceived" class="amount clickable-amount">
                   ₹ {{ item.received | number:'1.2-2' }}
                 </span>
-
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Housing -->
-        <div class="accordion-item" [class.open]="isOpen">
-          <div class="accordion-header" (click)="toggle()">
-            <h5>Housing</h5>
-
-            <span class="arrow" [class.rotate]="isOpen">
-              ▼
-            </span>
-          </div>
-
-          <div class="accordion-body">
-
-            <!-- TABLE HEADER -->
-            <div class="row-head">
-              <span></span>
-              <span>Planned</span>
-              <span>Received</span>
-            </div>
-
-            <!-- TABLE ROWS -->
-            <div class="row-item" *ngFor="let item of housing">
-              <span>{{ item.name }}</span>
-              <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-
-              <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Transportation -->
-        <div class="accordion-item" [class.open]="isExp">
-          <div class="accordion-header" (click)="togglet()">
-            <h5>Transportation</h5>
-
-            <span class="arrow" [class.rotate]="isExp">
-              ▼
-            </span>
-          </div>
-
-          <div class="accordion-body">
-
-            <!-- TABLE HEADER -->
-            <div class="row-head">
-              <span></span>
-              <span>Planned</span>
-              <span>Received</span>
-            </div>
-
-            <!-- TABLE ROWS -->
-            <div class="row-item" *ngFor="let item of tranportation">
-              <span>{{ item.name }}</span>
-              <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned | number:'1.2-2' }}
+          <!-- Food -->
+          <div class="accordion-item" [class.open]="isExpand">
+            <div class="accordion-header" (click)="togglef()">
+              <h5>Food</h5>
+              <span class="arrow" [class.rotate]="isExpand">
+                ▼
               </span>
-
-              <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-
-              <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-
             </div>
-          </div>
-        </div>
-
-        <!-- Food -->
-        <div class="accordion-item" [class.open]="isExpand">
-          <div class="accordion-header" (click)="togglef()">
-            <h5>Food</h5>
-            <span class="arrow" [class.rotate]="isExpand">
-              ▼
-            </span>
-          </div>
-          <div class="accordion-body">
-            <!-- TABLE HEADER -->
-            <div class="row-head">
-              <span></span>
-              <span>Planned</span>
-              <span>Received</span>
-            </div>
-            <!-- TABLE ROWS -->
-            <div class="row-item" *ngFor="let item of food">
-              <span>{{ item.name }}</span>
-              <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-
-              <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-
-            </div>
-          </div>
-        </div>
-
-        <!-- Personal -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Personal</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
-
-            <tr *ngFor="let item of personal">
-              <td>{{ item.name }}</td>
-
-              <td>
+            <div class="accordion-body">
+              <!-- TABLE HEADER -->
+              <div class="row-head">
+                <span></span>
+                <span>Planned</span>
+                <span>Received</span>
+              </div>
+              <!-- TABLE ROWS -->
+              <div class="row-item" *ngFor="let item of food">
+                <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
+                  (click)="editAmount(item, 'planned',false)">
                   ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
 
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
+                <span *ngIf="!item.editReceived" class="amount clickable-amount">
                   ₹ {{ item.received | number:'1.2-2' }}
                 </span>
-
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Health -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Health</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
-
-            <tr *ngFor="let item of health">
-              <td>{{ item.name }}</td>
-
-              <td>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
-                </span>
-
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
-
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received | number:'1.2-2' }}
-                </span>
-
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Insurance -->
-        <div class="accordion-item" [class.open]="isOpeni">
-          <div class="accordion-header" (click)="togglei()">
-            <h5>Insurance</h5>
-            <span class="arrow" [class.rotate]="isOpeni">
-              ▼
-            </span>
-          </div>
-          <div class="accordion-body">
-            <!-- TABLE HEADER -->
-            <div class="row-head">
-              <span></span>
-              <span>Planned</span>
-              <span>Received</span>
-            </div>
-            <!-- TABLE ROWS -->
-            <div class="row-item" *ngFor="let item of insurance">
-              <span>{{ item.name }}</span>
-              <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                (click)="editAmount(item, 'planned',false)">
-                ₹ {{ item.planned | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-
-              <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                (click)="editAmount(item, 'received', false)">
-                ₹ {{ item.received | number:'1.2-2' }}
-              </span>
-
-              <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Loan Repayment -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Loan Repayment</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
+          <!-- Personal -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Personal</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
 
-            <tr *ngFor="let item of loan">
-              <td>{{ item.name }}</td>
+              <tr *ngFor="let item of personal">
+                <td>{{ item.name }}</td>
 
-              <td>
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
+
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
+
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Health -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Health</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
+
+              <tr *ngFor="let item of health">
+                <td>{{ item.name }}</td>
+
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
+
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
+
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Insurance -->
+          <div class="accordion-item" [class.open]="isOpeni">
+            <div class="accordion-header" (click)="togglei()">
+              <h5>Insurance</h5>
+              <span class="arrow" [class.rotate]="isOpeni">
+                ▼
+              </span>
+            </div>
+            <div class="accordion-body">
+              <!-- TABLE HEADER -->
+              <div class="row-head">
+                <span></span>
+                <span>Planned</span>
+                <span>Received</span>
+              </div>
+              <!-- TABLE ROWS -->
+              <div class="row-item" *ngFor="let item of insurance">
+                <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
+                  (click)="editAmount(item, 'planned',false)">
                   ₹ {{ item.planned | number:'1.2-2' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
 
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
+                <span *ngIf="!item.editReceived" class="amount clickable-amount">
                   ₹ {{ item.received | number:'1.2-2' }}
                 </span>
+              </div>
+            </div>
+          </div>
 
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>
+          <!-- Loan Repayment -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Loan Repayment</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
 
-        <!-- Entertainment -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Entertainment</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
+              <tr *ngFor="let item of loan">
+                <td>{{ item.name }}</td>
 
-            <tr *ngFor="let item of entertainment">
-              <td>{{ item.name }}</td>
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
 
-              <td>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
-                </span>
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
 
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
 
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received | number:'1.2-2' }}
-                </span>
+          <!-- Entertainment -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Entertainment</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
 
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
-        </div>
+              <tr *ngFor="let item of entertainment">
+                <td>{{ item.name }}</td>
 
-        <!-- Child Care -->
-        <div class="card">
-          <table class="table">
-            <tr>
-              <th>Child Care</th>
-              <th>Planned</th>
-              <th>Received</th>
-            </tr>
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
 
-            <tr *ngFor="let item of childcare">
-              <td>{{ item.name }}</td>
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
 
-              <td>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                  (click)="editAmount(item, 'planned', false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
-                </span>
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
 
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-              </td>
+          <!-- Child Care -->
+          <div class="card">
+            <table class="table">
+              <tr>
+                <th>Child Care</th>
+                <th>Planned</th>
+                <th>Received</th>
+              </tr>
 
-              <td>
-                <span *ngIf="!item.editReceived" class="amount clickable-amount"
-                  (click)="editAmount(item, 'received', false)">
-                  ₹ {{ item.received | number:'1.2-2' }}
-                </span>
+              <tr *ngFor="let item of childcare">
+                <td>{{ item.name }}</td>
 
-                <input *ngIf="item.editReceived" type="number" [(ngModel)]="item.received"
-                  (blur)="finishEdit(item, 'received')" (keydown.enter)="finishEdit(item, 'received')" autofocus />
-              </td>
-            </tr>
-          </table>
+                <td>
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                    (click)="editAmount(item, 'planned', false)">
+                    ₹ {{ item.planned | number:'1.2-2' }}
+                  </span>
+
+                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                </td>
+
+                <td>
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
+                    ₹ {{ item.received | number:'1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
-
       <!-- RIGHT SIDE (FIXED BUDGET SUMMARY) -->
-      <div class="summary-fixed">
-        <div class="card">
-          <div *ngIf="shouldShowSummaryBox()">
+      <div class="right-section card">
+        <div class="summary-fixed">
 
-            <h3 *ngIf="amountLeft > 0 && hasEnteredAmount" class="left-budget">
-              Amount left to budget: Rs. {{ amountLeft | number:'1.2-2' }}
-            </h3>
-
-            <h3 *ngIf="amountLeft === 0 && hasEnteredAmount" class="balanced">
-              🎉 You've Got a Budget!
-            </h3>
-
-            <h3 *ngIf="amountLeft < 0 && hasEnteredAmount" class="over-budget">
-              Amount over budget: Rs. {{ amountLeft * -1 | number:'1.2-2' }}
-            </h3>
+          <div class="tabs">
+            <button [class.active]="activeTab === 'summary'" (click)="activeTab = 'summary'">Budget Summary</button>
+            <button [class.active]="activeTab === 'transactions'"
+              (click)="activeTab = 'transactions'">Transactions</button>
           </div>
-          <div class="divider"></div>
+          <div>
+            <div *ngIf="activeTab === 'summary'" class="tab-pane">
+              <h3>Budget Summary</h3>
+              <div class="pie-chart-wrapper">
+                <canvas baseChart [data]="pieChartData" [labels]="pieChartLabels" [options]="pieChartOptions"
+                  [type]="'doughnut'">
+                </canvas>
+              </div>
+              <div class="category-list" *ngIf="categoryDisplay.length > 0">
+                <div class="category-row" *ngFor="let c of categoryDisplay">
+                  <span class="dot" [style.backgroundColor]="c.color"></span>
+                  <span class="name">{{ c.name }}</span>
+                  <span class="percent">{{ c.percent }}%</span>
+                </div>
+              </div>
+              <button class="reset-btn" (click)="openResetPopup()">⟳ Reset Budget</button>
 
-          <h3>Budget Summary</h3>
-          <div class="pie-chart-wrapper">
-            <canvas baseChart [data]="pieChartData" [labels]="pieChartLabels" [options]="pieChartOptions"
-              [type]="'doughnut'">
-            </canvas>
-          </div>
-          <div class="category-list" *ngIf="categoryDisplay.length > 0">
-            <div class="category-row" *ngFor="let c of categoryDisplay">
-              <span class="dot" [style.backgroundColor]="c.color"></span>
-              <span class="name">{{ c.name }}</span>
-              <span class="percent">{{ c.percent }}%</span>
+              <app-reset-budget-popup *ngIf="showResetPopup" (closePopup)="showResetPopup = false"
+                (makeZero)="resetAllAmountsToZero()" (copyLast)="copyLatestBudgetForMonth()">
+              </app-reset-budget-popup>
+            </div>
+            <div *ngIf="activeTab === 'transactions'" class="tab-pane">
+              <div class="page-wrapper">
+
+                <div class="content">
+
+                  <!-- Left: Transactions -->
+                  <div class="transactions-box card">
+                    <h3>Transactions</h3>
+                    <div class="transactions-scroll">
+                      <div class="transaction-card" *ngFor="let t of transactions">
+
+                        <div class="left">
+                          <div class="icon-circle">
+                            <span class="icon">{{ t.date | date:'MMM dd'}}</span>
+                          </div>
+                          <div>
+                            <div class="title">{{ t.category }}</div>
+                            <div class="subtitle">{{ t.description }}</div>
+
+                          </div>
+                          <!-- <div class="subtitle">{{ t.date }}</div> -->
+
+                        </div>
+
+                        <div class="amount">₹ {{ t.amount }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="fab" (click)="openPopup(popupType)"> + </button>
+
+                  <!-- Right: Summary -->
+                  <div class="summary-box card">
+                    <h3>Summary</h3>
+                    <div class="transactions-scroll">
+                      <div class="transaction-card" *ngFor="let s of summary | keyvalue">
+
+                        <div class="left">
+                          <div class="details">
+                            <div class="category">{{ s.key }}</div>
+                            <div class="subtext">₹{{ s.value.spent }} from ₹{{ s.value.allotted }}</div>
+                            <div class="progress">
+                              <div class="progress-fill red"
+                                [style.width.%]="(s.value.spent / (s.value.allotted || 1)) * 100">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Popup -->
+                <div class="popup-backdrop" *ngIf="showPopup">
+                  <div class="popup">
+                    <div class="popup-header">
+                      <h3>{{ popupType === 'income' ? 'Add Income' : 'Add Expense' }}</h3>
+                      <span class="close" (click)="closePopup()">✕</span>
+                    </div>
+                    <div class="toggle">
+                      <label>
+                        <input type="radio" name="type" value="income" [(ngModel)]="popupType"
+                          (change)="onTypeChange()" />
+                        Income
+                      </label>
+                      <label>
+                        <input type="radio" name="type" value="expense" [(ngModel)]="popupType"
+                          (change)="onTypeChange()" />
+                        Expense
+                      </label>
+                    </div>
+                    <div class="form">
+                      <div class="form-group">
+                        <label>Category</label>
+                        <select [(ngModel)]="form.category">
+                          <option *ngFor="let c of selectedCategoryList">{{ c }}</option>
+                        </select>
+                      </div>
+                      <div class="row">
+                        <div class="form-group half">
+                          <label>Amount</label>
+                          <input type="number" [(ngModel)]="form.amount" />
+                        </div>
+                        <div class="form-group half">
+                          <label>Date</label>
+                          <input type="date" [(ngModel)]="form.date" />
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" [(ngModel)]="form.description"
+                          [placeholder]="popupType==='income' ? 'Where did this money come from?' : 'Where did you spend this money?'" />
+                      </div>
+                      <div class="actions">
+                        <button class="cancel" (click)="closePopup()">Cancel</button>
+                        <button class="submit" (click)="submitTransaction()">{{ popupType === 'income' ? 'Add Income'
+                          :
+                          'Add Expense' }} </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- POPUP EDIT BOX -->
+            <div class="left-toast" *ngIf="showLeftToast">
+              {{ leftMessage }}
             </div>
           </div>
-          <button class="reset-btn" (click)="openResetPopup()">⟳ Reset Budget</button>
 
-          <app-reset-budget-popup *ngIf="showResetPopup" (closePopup)="showResetPopup = false"
-            (makeZero)="resetAllAmountsToZero()" (copyLast)="copyLatestBudgetForMonth()">
-          </app-reset-budget-popup>
+          <div class="success-popup" *ngIf="successPopup">
+            {{ successMessage }}
+          </div>
         </div>
       </div>
-      <!-- POPUP EDIT BOX -->
-      <div class="left-toast" *ngIf="showLeftToast">
-        {{ leftMessage }}
-      </div>
-    </div>
-  </div>
-  <div class="success-popup" *ngIf="successPopup">
-    {{ successMessage }}
-  </div>
-
-</div>
