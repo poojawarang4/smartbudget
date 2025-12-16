@@ -52,7 +52,8 @@ export class Budget implements OnInit {
   ];
 
   transactions: Transaction[] = [];
-
+  isEditMode = false;
+  editingTransaction: any = null;
   summary: Record<string, SummaryItem> = {};
 
   expenseCategories: any[] = [
@@ -653,13 +654,27 @@ export class Budget implements OnInit {
   }
 
   openPopup(type: 'income' | 'expense') {
+    this.isEditMode = false;
+    this.editingTransaction = null;
+
     this.popupType = type;
-    this.showPopup = true;
+
+    this.form = {
+      category: '',
+      amount: 0,
+      date: '',
+      description: ''
+    };
+
     this.onTypeChange();
+    this.showPopup = true;
   }
+
 
   closePopup() {
     this.showPopup = false;
+    this.isEditMode = false;
+    this.editingTransaction = null;
     this.form = { category: '', amount: 0, date: '', description: '' };
   }
 
@@ -674,51 +689,151 @@ export class Budget implements OnInit {
   }
 
   submitTransaction() {
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}'
+    );
+
     const mainCategory = this.getMainCategory(this.form.category);
-    const newItem: Transaction = {
-      id: Date.now().toString(),
-      icon: this.getIcon(mainCategory),   // ✅ FIX ADDED
-      type: this.popupType,
-      category: this.form.category,
-      amount: Number(this.form.amount),
-      date: this.form.date,
-      description: this.form.description,
-      month: this.selectedMonthIndex,
-      year: this.selectedYear
-    };
-    const data = JSON.parse(localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}');
-    // save transaction
-    data.transactions.push(newItem);
-    if (this.popupType === 'income') {
-      const incomeRow = this.income.find(i => i.name === this.form.category);
-      if (incomeRow) {
-        const updated =
-          Number(incomeRow.received || 0) + Number(this.form.amount || 0);
-        incomeRow.received = updated.toFixed(2); // ✅ string
+
+    if (this.isEditMode && this.editingTransaction) {
+      const index = data.transactions.findIndex(
+        (t: Transaction) => t.id === this.editingTransaction!.id
+      );
+
+      if (index === -1) return;
+
+      const old = data.transactions[index];
+
+      // 🔁 REVERSE OLD EFFECTS
+      if (old.type === 'income') {
+        const row = this.income.find(i => i.name === old.category);
+        if (row) {
+          row.received = (
+            Number(row.received || 0) - Number(old.amount)
+          ).toFixed(2);
+        }
       }
-    }
-    // update summary
-    if (this.popupType === 'expense') {
-      if (!data.summary[mainCategory]) {
-        data.summary[mainCategory] = {
-          allotted: 0,
-          spent: 0,
-          remain: 0
-        };
+
+      if (old.type === 'expense') {
+        const oldMain = this.getMainCategory(old.category);
+        if (data.summary[oldMain]) {
+          data.summary[oldMain].spent -= old.amount;
+          data.summary[oldMain].remain =
+            data.summary[oldMain].allotted - data.summary[oldMain].spent;
+        }
       }
-      data.summary[mainCategory].spent += newItem.amount;
-      data.summary[mainCategory].remain =
-        data.summary[mainCategory].allotted - data.summary[mainCategory].spent;
+
+      // ✏️ CREATE UPDATED TRANSACTION
+      const updated: Transaction = {
+        ...old,
+        category: this.form.category,
+        amount: Number(this.form.amount),
+        date: this.form.date,
+        description: this.form.description,
+        type: this.popupType,
+        icon: this.getIcon(mainCategory)
+      };
+
+      // ✅ REPLACE in storage
+      data.transactions[index] = updated;
+
+      // ➕ APPLY NEW EFFECTS
+      if (updated.type === 'income') {
+        const row = this.income.find(i => i.name === updated.category);
+        if (row) {
+          row.received = (
+            Number(row.received || 0) + updated.amount
+          ).toFixed(2);
+        }
+      }
+
+      if (updated.type === 'expense') {
+        if (!data.summary[mainCategory]) {
+          data.summary[mainCategory] = { allotted: 0, spent: 0, remain: 0 };
+        }
+
+        data.summary[mainCategory].spent += updated.amount;
+        data.summary[mainCategory].remain =
+          data.summary[mainCategory].allotted -
+          data.summary[mainCategory].spent;
+      }
+
+      this.showSuccess('Transaction updated successfully');
+      localStorage.setItem('smartbudget-data', JSON.stringify(data));
+
+      // 🔄 HARD reload from storage
+      this.loadTransactions();
+      this.loadSummary();
+      this.updateExpenseReceivedFromTransactions();
+      this.onAmountChange();
+
+
+    } else {
+      // =========================
+      // ➕ ADD TRANSACTION
+      // =========================
+
+      const newItem: Transaction = {
+        id: Date.now().toString(),
+        icon: this.getIcon(mainCategory),
+        type: this.popupType,
+        category: this.form.category,
+        amount: Number(this.form.amount),
+        date: this.form.date,
+        description: this.form.description,
+        month: this.selectedMonthIndex,
+        year: this.selectedYear
+      };
+
+      data.transactions.push(newItem);
+
+      if (this.popupType === 'income') {
+        const incomeRow = this.income.find(i => i.name === this.form.category);
+        if (incomeRow) {
+          incomeRow.received = (
+            Number(incomeRow.received || 0) + newItem.amount
+          ).toFixed(2);
+        }
+      }
+
+      if (this.popupType === 'expense') {
+        if (!data.summary[mainCategory]) {
+          data.summary[mainCategory] = { allotted: 0, spent: 0, remain: 0 };
+        }
+
+        data.summary[mainCategory].spent += newItem.amount;
+        data.summary[mainCategory].remain =
+          data.summary[mainCategory].allotted -
+          data.summary[mainCategory].spent;
+      }
+
+      // this.successMessage = 'Transaction added successfully';
+      this.showSuccess('Transaction added successfully');
+
     }
-    // SAVE
+
+    // =========================
+    // 💾 SAVE & REFRESH
+    // =========================
     localStorage.setItem('smartbudget-data', JSON.stringify(data));
-    // reload
+
     this.saveBudget();
     this.onAmountChange();
     this.loadTransactions();
     this.loadSummary();
     this.updateExpenseReceivedFromTransactions();
+
+    this.successPopup = true;
     this.closePopup();
+  }
+  showSuccess(message: string, duration = 2000) {
+    this.successMessage = message;
+    this.successPopup = true;
+
+    setTimeout(() => {
+      this.successPopup = false;
+      this.successMessage = '';
+    }, duration);
   }
 
   loadTransactions() {
@@ -873,10 +988,34 @@ export class Budget implements OnInit {
         : Number(item.received);
 
     if (received > planned) {
-      const extra = received - planned;
-      return `-₹ ${extra.toFixed(2)}`;
+      // const extra = received - planned;
+      return `-₹ ${received.toFixed(2)}`;
     }
     return `₹ ${received.toFixed(2)}`;
+  }
+  editTransaction(transaction: any) {
+    this.isEditMode = true;
+    this.editingTransaction = transaction;
+
+    // Detect income or expense
+    this.popupType = transaction.type; // 'income' | 'expense'
+
+    // Prepopulate form
+    this.form = {
+      category: transaction.category,
+      amount: transaction.amount,
+      date: this.formatDate(transaction.date),
+      description: transaction.description
+    };
+
+    // Update category dropdown
+    this.onTypeChange();
+
+    this.showPopup = true;
+  }
+  formatDate(date: string | Date): string {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
   }
 
 }

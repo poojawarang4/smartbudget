@@ -451,7 +451,7 @@
                       <p>Add your first income or expense to see it here.</p>
                     </div>
                     <div class="transactions-scroll">
-                      <div class="transaction-card" *ngFor="let t of transactions">
+                      <div class="transaction-card" *ngFor="let t of transactions" (click)="editTransaction(t)">
 
                         <div class="left">
                           <div class="icon-circle">
@@ -504,7 +504,11 @@
                 <div class="popup-backdrop" *ngIf="showPopup">
                   <div class="popup">
                     <div class="popup-header">
-                      <h3>{{ popupType === 'income' ? 'Add Income' : 'Add Expense' }}</h3>
+                      <h3>
+                        {{ isEditMode
+                        ? (popupType === 'income' ? 'Edit Income' : 'Edit Expense')
+                        : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
+                      </h3>
                       <span class="close" (click)="closePopup()">✕</span>
                     </div>
                     <div class="toggle">
@@ -543,9 +547,10 @@
                       </div>
                       <div class="actions">
                         <button class="cancel" (click)="closePopup()">Cancel</button>
-                        <button class="submit" (click)="submitTransaction()">{{ popupType === 'income' ? 'Add Income'
-                          :
-                          'Add Expense' }} </button>
+                        <button class="submit" (click)="submitTransaction()">
+                          {{ isEditMode ? 'Update' : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
+                        </button>
+
                       </div>
                     </div>
                   </div>
