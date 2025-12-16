@@ -510,22 +510,30 @@ export class Budget implements OnInit {
 
   resetAllAmountsToZero() {
     const allGroups = [
-      this.income, this.savings, this.giving, this.housing, this.tranportation,
-      this.food, this.personal, this.health, this.insurance, this.loan,
-      this.entertainment, this.childcare
+      this.income, this.savings, this.giving, this.housing,
+      this.tranportation, this.food, this.personal, this.health,
+      this.insurance, this.loan, this.entertainment, this.childcare
     ];
+
     allGroups.forEach(group => {
       group.forEach(item => {
         item.planned = '0.00';
         item.received = '0.00';
       });
     });
+
+    // ✅ Save reset flag for this month
+    const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
+    localStorage.setItem(resetKey, 'true');
+
     this.hasEnteredAmount = false;
     this.amountLeft = 0;
     this.totalIncome = 0;
     this.totalPlannedExpenses = 0;
+
     this.saveBudget();
     this.calculateTotals();
+
     this.budgetShared.updateBudgetInfo({
       totalIncome: 0,
       totalPlannedExpenses: 0,
@@ -533,8 +541,11 @@ export class Budget implements OnInit {
       hasEnteredAmount: false,
       shouldShowSummaryBox: false
     });
-    this.showSuccessPopup("All amounts were reset to ₹0.");
+
+    this.showSuccessPopup("Budget reset to ₹0.00");
   }
+
+
 
   showSuccessPopup(msg: string) {
     this.successMessage = msg;
@@ -688,6 +699,9 @@ export class Budget implements OnInit {
   }
 
   submitTransaction() {
+    const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
+    localStorage.removeItem(resetKey);
+
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}'
     );
@@ -894,18 +908,25 @@ export class Budget implements OnInit {
   }
 
   updateExpenseReceivedFromTransactions() {
+    const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
+
+    // ❌ If budget was reset, do NOT recalc received
+    if (localStorage.getItem(resetKey) === 'true') {
+      return;
+    }
+
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
     );
 
-    // 1️⃣ Reset all expense received values
+    // Reset received
     this.allCategories.forEach(group => {
       group.forEach(item => {
         item.received = '0.00';
       });
     });
 
-    // 2️⃣ Filter current month expenses
+    // Recalculate from transactions
     const monthExpenses: Transaction[] = data.transactions.filter(
       (t: Transaction) =>
         t.type === 'expense' &&
@@ -913,7 +934,6 @@ export class Budget implements OnInit {
         t.year === this.selectedYear
     );
 
-    // 3️⃣ Add amounts to EXACT matching sub-category
     monthExpenses.forEach((t: Transaction) => {
       const mainCategory = this.getMainCategory(t.category);
 
@@ -931,6 +951,7 @@ export class Budget implements OnInit {
       }
     });
   }
+
 
   getProgressPercent(value: { spent: number; allotted: number }): number {
     // No budget → show full bar as alert

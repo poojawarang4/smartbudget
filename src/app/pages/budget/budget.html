@@ -485,8 +485,10 @@
 
                         <div class="left">
                           <div class="details">
+                            <div class="summary-row">
                             <div class="category">{{ s.key }}</div>
-                            <div class="subtext">₹{{ s.value.spent }} from ₹{{ s.value.allotted }}</div>
+                            <div class="subtext">₹{{ s.value.spent }} Out of ₹{{ s.value.allotted }}</div>
+                            </div>
                             <div class="progress">
                               <div class="progress-fill" [ngClass]="getProgressClass(s.value)"
                                 [style.width.%]="getProgressPercent(s.value)">
