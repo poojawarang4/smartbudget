@@ -523,11 +523,24 @@ export class Budget implements OnInit {
         item.received = '0.00';
       });
     });
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}'
+    );
+
+    data.transactions = data.transactions.filter(
+      (t: Transaction) =>
+        !(t.month === this.selectedMonthIndex && t.year === this.selectedYear)
+    );
+
+    localStorage.setItem('smartbudget-data', JSON.stringify(data));
+
     this.hasEnteredAmount = false;
     this.amountLeft = 0;
     this.totalIncome = 0;
     this.totalPlannedExpenses = 0;
     this.saveBudget();
+    this.loadTransactions();
+    this.loadSummary();
     this.calculateTotals();
     this.showSuccessPopup("All amounts were reset to ₹0.");
   }
@@ -563,7 +576,7 @@ export class Budget implements OnInit {
       { name: 'Insurance', data: this.insurance },
       { name: 'Loan', data: this.loan },
       { name: 'Entertainment', data: this.entertainment },
-      { name: 'Child Care', data: this.childcare }
+      { name: 'ChildCare', data: this.childcare }
     ];
     const labels: string[] = [];
     const values: number[] = [];
@@ -975,7 +988,6 @@ export class Budget implements OnInit {
       item.received === '' || item.received == null
         ? 0
         : Number(item.received);
-
     return received > planned ? 'exceed' : '';
   }
 
@@ -993,13 +1005,12 @@ export class Budget implements OnInit {
     }
     return `₹ ${received.toFixed(2)}`;
   }
+
   editTransaction(transaction: any) {
     this.isEditMode = true;
     this.editingTransaction = transaction;
-
     // Detect income or expense
     this.popupType = transaction.type; // 'income' | 'expense'
-
     // Prepopulate form
     this.form = {
       category: transaction.category,
@@ -1007,12 +1018,11 @@ export class Budget implements OnInit {
       date: this.formatDate(transaction.date),
       description: transaction.description
     };
-
     // Update category dropdown
     this.onTypeChange();
-
     this.showPopup = true;
   }
+
   formatDate(date: string | Date): string {
     const d = new Date(date);
     return d.toISOString().split('T')[0];
