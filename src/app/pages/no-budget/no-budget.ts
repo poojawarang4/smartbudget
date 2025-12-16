@@ -24,6 +24,7 @@ export class NoBudget implements OnInit {
       this.hasLatestBudget = this.checkIfAnyBudgetExists();
     });
   }
+
   getMonthName(index: number): string {
     const names = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -36,6 +37,7 @@ export class NoBudget implements OnInit {
     this.startPlanning.emit();
     this.router.navigate(['/budget']);
   }
+
   copyFromLatest() {
     this.copyLatestBudget.emit();
     this.router.navigate(['/budget']);

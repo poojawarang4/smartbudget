@@ -33,7 +33,7 @@
                   <!-- DISPLAY MODE -->
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', true)">
-                    ₹ {{ item.planned | currency:'INR'}}
+                    {{ item.planned | currency:'INR'}}
                   </span>
 
                   <!-- EDIT MODE -->
@@ -43,7 +43,7 @@
                 <!-- Received Editable -->
                 <td>
                   <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                    {{ item.received | currency:'INR' }}
                   </span>
                 </td>
               </tr>
@@ -65,7 +65,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -73,8 +73,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
 
                 </td>
@@ -97,7 +97,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -105,8 +105,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
                 </td>
               </tr>
@@ -137,14 +137,14 @@
                 <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned',false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
+                  {{ item.planned | currency:'INR' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
 
-                <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                  ₹ {{ item.received | number:'1.2-2' }}
+                <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                  {{ getReceivedDisplay(item) }}
                 </span>
               </div>
             </div>
@@ -174,14 +174,14 @@
                 <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned',false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
+                  {{ item.planned | currency:'INR' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
 
-                <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                  ₹ {{ item.received | number:'1.2-2' }}
+                <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                  {{ getReceivedDisplay(item) }}
                 </span>
               </div>
             </div>
@@ -207,14 +207,14 @@
                 <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned',false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
+                  {{ item.planned | currency:'INR' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
 
-                <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                  ₹ {{ item.received | number:'1.2-2' }}
+                <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                  {{ getReceivedDisplay(item) }}
                 </span>
               </div>
             </div>
@@ -235,7 +235,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -243,8 +243,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
                 </td>
               </tr>
@@ -266,7 +266,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -274,8 +274,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
                 </td>
               </tr>
@@ -302,14 +302,14 @@
                 <span>{{ item.name }}</span>
                 <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                   (click)="editAmount(item, 'planned',false)">
-                  ₹ {{ item.planned | number:'1.2-2' }}
+                  {{ item.planned | currency:'INR' }}
                 </span>
 
                 <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                   (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
 
-                <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                  ₹ {{ item.received | number:'1.2-2' }}
+                <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                  {{ getReceivedDisplay(item) }}
                 </span>
               </div>
             </div>
@@ -330,7 +330,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -338,8 +338,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
                 </td>
               </tr>
@@ -361,7 +361,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -369,8 +369,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
                 </td>
               </tr>
@@ -392,7 +392,7 @@
                 <td>
                   <span *ngIf="!item.editPlanned" class="amount clickable-amount"
                     (click)="editAmount(item, 'planned', false)">
-                    ₹ {{ item.planned | number:'1.2-2' }}
+                    {{ item.planned | currency:'INR' }}
                   </span>
 
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
@@ -400,8 +400,8 @@
                 </td>
 
                 <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount">
-                    ₹ {{ item.received | number:'1.2-2' }}
+                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
+                    {{ getReceivedDisplay(item) }}
                   </span>
                 </td>
               </tr>
@@ -441,12 +441,15 @@
             </div>
             <div *ngIf="activeTab === 'transactions'" class="tab-pane">
               <div class="page-wrapper">
-
                 <div class="content">
-
                   <!-- Left: Transactions -->
                   <div class="transactions-box card">
                     <h3>Transactions</h3>
+                    <div class="empty-state" *ngIf="transactions.length === 0">
+                      <div class="empty-icon">📭</div>
+                      <h4>No transactions yet</h4>
+                      <p>Add your first income or expense to see it here.</p>
+                    </div>
                     <div class="transactions-scroll">
                       <div class="transaction-card" *ngFor="let t of transactions">
 
@@ -472,6 +475,11 @@
                   <!-- Right: Summary -->
                   <div class="summary-box card">
                     <h3>Summary</h3>
+                    <div class="empty-state" *ngIf="!summary || (summary | keyvalue).length === 0">
+                      <div class="empty-icon">📊</div>
+                      <h4>No summary available</h4>
+                      <p>Summary will appear once transactions are added.</p>
+                    </div>
                     <div class="transactions-scroll">
                       <div class="transaction-card" *ngFor="let s of summary | keyvalue">
 
@@ -480,10 +488,11 @@
                             <div class="category">{{ s.key }}</div>
                             <div class="subtext">₹{{ s.value.spent }} from ₹{{ s.value.allotted }}</div>
                             <div class="progress">
-                              <div class="progress-fill red"
-                                [style.width.%]="(s.value.spent / (s.value.allotted || 1)) * 100">
+                              <div class="progress-fill" [ngClass]="getProgressClass(s.value)"
+                                [style.width.%]="getProgressPercent(s.value)">
                               </div>
                             </div>
+
                           </div>
                         </div>
                       </div>
@@ -554,3 +563,6 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>

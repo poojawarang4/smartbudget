@@ -43,6 +43,7 @@ export class Header implements OnInit {
   ];
   shouldShow: boolean = false;
   totalIncome: any;
+
   constructor(private monthService: MonthService, private budgetShared: BudgetSharedService) { }
 
   ngOnInit() {
@@ -109,7 +110,6 @@ export class Header implements OnInit {
     }
     this.visibleMonths = result;
   }
-
 
   selectMonth(index: number, year: number) {
     this.selectedMonthIndex = index;

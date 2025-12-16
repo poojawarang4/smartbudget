@@ -12,8 +12,6 @@ import { Header } from './layout/header/header';
     RouterOutlet,
     Sidebar,
     Header
-
-    
   ]
 })
 export class App {

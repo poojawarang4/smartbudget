@@ -114,13 +114,10 @@ export class Budget implements OnInit {
   totalPlannedExpenses: number = 0;
   budgetStatus: string = "";
   amountLeft: number = 0;
-  showIncomeWarning = false;
   showLeftToast: boolean = false;
   leftMessage: string = "";
-  editValue: any = '';
   incomeTotal: number = 0;
   allCategories: any[][] = [];
-  hasEdited = false;
   hasEnteredAmount = false;
   selectedYear = new Date().getFullYear();
   selectedMonthIndex = new Date().getMonth(); // 0-11
@@ -128,7 +125,6 @@ export class Budget implements OnInit {
   selectedMonth = '';
   expenses: any[] = [];
   showResetPopup = false;
-  hasLatestBudget: boolean = false;
   successPopup = false;
   successMessage = "";
   hasAnyBudget = false;
@@ -244,48 +240,9 @@ export class Budget implements OnInit {
     }
     return false;
   }
-  getCurrentYearMonth() {
-    const key = this.getMonthKey(); // e.g., budget-2025-10
-    const parts = key.split('-');   // ["budget", "2025", "10"]
 
-    return {
-      year: Number(parts[1]),
-      month: Number(parts[2])
-    };
-  }
-
-  getPreviousMonthKey(): string | null {
-    const { year, month } = this.getCurrentYearMonth();
-
-    let prevYear = year;
-    let prevMonth = this.selectedMonthIndex - 1; // month is 1–12 here
-
-    if (prevMonth === 0) {
-      prevYear--;
-      prevMonth = 12;
-    }
-
-    if (prevYear < 2020) return null;
-
-    // Return correct localStorage key format
-    return `budget-${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
-  }
-
-  startPlanningForNewMonth() {
-    this.resetToZeroValues();
-    this.budgetExistsForMonth = true;
-    this.saveBudget();
-  }
   startPlanningForMonth() {
     this.loadBudgetForMonth(true);
-  }
-
-  getMonthIndexFromName(index: number): string {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[index];
   }
 
   getMonthName(index: number) {
@@ -294,10 +251,6 @@ export class Budget implements OnInit {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return months[index];
-  }
-
-  getStorageKey() {
-    return `budget-${this.selectedYear}-${this.selectedMonthIndex}`;
   }
 
   toggle() {
@@ -326,7 +279,6 @@ export class Budget implements OnInit {
       ...this.health,
       ...this.loan,
       ...this.entertainment,
-      ...this.insurance,
       ...this.childcare
     ];
 
@@ -386,10 +338,8 @@ export class Budget implements OnInit {
       // Ensure number type
       item[type] = Number(item[type]);
     }
-
     // Close edit mode
     item["edit" + this.capitalize(type)] = false;
-
     // Recalculate UI + save
     this.onAmountChange();
     this.calculateSummaryPieChart();
@@ -400,7 +350,6 @@ export class Budget implements OnInit {
   shouldShowSummaryBox(): boolean {
     const hasIncomeAmount =
       this.income.some(i => Number(i.planned) > 0 || Number(i.received) > 0);
-
     const hasCategoryAmount =
       this.allCategories.some(cat =>
         cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
@@ -412,10 +361,8 @@ export class Budget implements OnInit {
 
   onAmountChange() {
     this.calculateTotals();
-
     this.hasEnteredAmount =
       this.totalIncome > 0 || this.totalPlannedExpenses > 0;
-
     this.budgetShared.updateBudgetInfo({
       totalIncome: this.totalIncome,
       totalPlannedExpenses: this.totalPlannedExpenses,
@@ -432,7 +379,6 @@ export class Budget implements OnInit {
   getKey(year: number, monthIndex: number) {
     return `budget-${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
   }
-
 
   loadBudgetForMonth(forceCreate: boolean = false) {
     const key = this.getMonthKey()
@@ -462,6 +408,7 @@ export class Budget implements OnInit {
     this.updateExpenseReceivedFromTransactions();
     this.onAmountChange();
   }
+
   rebuildAllCategories() {
     this.allCategories = [
       this.savings,
@@ -477,7 +424,6 @@ export class Budget implements OnInit {
       this.childcare
     ];
   }
-
 
   resetToZeroValues() {
     const resetArray = (arr: any[]) =>
@@ -504,30 +450,6 @@ export class Budget implements OnInit {
     this.amountLeft = 0;
   }
 
-  onStartPlanning() {
-    this.resetBudgetValues();
-    this.budgetExistsForMonth = true; // show budget page
-    this.saveBudget(); // save blank version
-  }
-
-  resetBudgetValues() {
-    this.income = [
-      { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
-    ];
-    this.housing = this.housing.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.tranportation = this.tranportation.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.food = this.food.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.insurance = this.insurance.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.savings = this.savings.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.giving = this.giving.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.personal = this.personal.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.health = this.health.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.loan = this.loan.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.entertainment = this.entertainment.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.childcare = this.childcare.map(i => ({ ...i, planned: '0.00', received: '0.00' }));
-    this.amountLeft = 0;
-  }
-
   saveBudget() {
     const key = this.getMonthKey();
     const data = {
@@ -545,10 +467,6 @@ export class Budget implements OnInit {
       childcare: this.childcare
     };
     localStorage.setItem(key, JSON.stringify(data));
-  }
-
-  startNewBudget() {
-    this.budgetExistsForMonth = true;
   }
 
   copyLatestBudgetForMonth() {
@@ -576,17 +494,6 @@ export class Budget implements OnInit {
     // reload UI
     this.loadBudgetForMonth(true);
     this.showSuccessPopup('Latest budget copied successfully');
-  }
-
-  findLatestBudget(): any {
-    for (let year = 2030; year >= 2020; year--) {
-      for (let m = 11; m >= 0; m--) {
-        const key = `${year}-${(m + 1).toString().padStart(2, '0')}`;
-        const saved = localStorage.getItem(key);
-        if (saved) return JSON.parse(saved);
-      }
-    }
-    return null;
   }
 
   openResetPopup() {
@@ -644,7 +551,6 @@ export class Budget implements OnInit {
       this.categoryDisplay = [];
       return;
     }
-
     const categories = [
       { name: 'Savings', data: this.savings },
       { name: 'Giving', data: this.giving },
@@ -672,12 +578,10 @@ export class Budget implements OnInit {
     const remainingPercent = +(100 - totalPercent).toFixed(1);
     // INTERNAL CHART DATA
     const chartData = [...percentages, remainingPercent];
-
     const chartColors = [
       ...this.chartColors.slice(0, percentages.length),
       "#e0e0e0" // remaining hidden color
     ];
-
     // Labels include remaining but we hide it in UI
     this.pieChartLabels = [...labels, "Remaining"];
     this.pieChartData = {
@@ -690,7 +594,6 @@ export class Budget implements OnInit {
         }
       ]
     };
-
     // ONLY show real categories
     this.categoryDisplay = labels.map((name, index) => ({
       name,
@@ -715,38 +618,30 @@ export class Budget implements OnInit {
                 return `Remaining – ${context.raw}%`;
               }
               const index = context.dataIndex;
-
               // Find category object
               const category = categories.find(c => c.name === categoryName);
               const items = category?.data || [];
-
               // Total amount for this category
               const totalCategoryAmount = values[index];
-
               // % of total income
               const categoryPercent = context.raw;
-
               // Format amount
               const formattedCategoryTotal = new Intl.NumberFormat('en-IN', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               }).format(totalCategoryAmount);
-
               // Build hierarchical breakdown
               let breakdown = `${categoryName} – ₹${formattedCategoryTotal} (${categoryPercent}%)\n`;
-
               items.forEach(item => {
                 const amt = Number(item.planned || 0);
                 const percentInsideCategory =
                   totalCategoryAmount > 0
                     ? ((amt / totalCategoryAmount) * 100).toFixed(1)
                     : 0;
-
                 const formattedAmt = new Intl.NumberFormat('en-IN', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 }).format(amt);
-
                 breakdown += `\n• ${item.name} – ₹${formattedAmt} (${percentInsideCategory}%)`;
               });
               return breakdown;
@@ -756,33 +651,6 @@ export class Budget implements OnInit {
       }
     };
   }
-
-  getBreakdownText(categoryItems: any[], totalCategoryAmount: number) {
-    return categoryItems
-      .map(item => {
-        const amt = Number(item.planned || 0);
-        const percent = totalCategoryAmount > 0 ? ((amt / totalCategoryAmount) * 100).toFixed(1) : 0;
-        const formattedAmt = new Intl.NumberFormat('en-IN', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }).format(amt);
-
-        return `• ${item.name} – ₹ ${formattedAmt} (${percent}%)`;
-      })
-      .join('\n');
-  }
-
-  // checkPreviousMonthBudget() {
-  //   let prevMonth = this.selectedMonthIndex - 1;
-  //   let prevYear = this.selectedYear;
-
-  //   if (prevMonth < 0) {
-  //     prevMonth = 11;
-  //     prevYear--;
-  //   }
-  //   const prevKey = this.getKey(prevYear, prevMonth);
-  //   this.hasLatestBudget = !!localStorage.getItem(prevKey);
-  // }
 
   openPopup(type: 'income' | 'expense') {
     this.popupType = type;
@@ -838,7 +706,6 @@ export class Budget implements OnInit {
           remain: 0
         };
       }
-
       data.summary[mainCategory].spent += newItem.amount;
       data.summary[mainCategory].remain =
         data.summary[mainCategory].allotted - data.summary[mainCategory].spent;
@@ -871,14 +738,12 @@ export class Budget implements OnInit {
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
     );
-
     const monthTransactions = data.transactions.filter(
       (t: Transaction) =>
         t.type === 'expense' &&
         t.month === this.selectedMonthIndex &&
         t.year === this.selectedYear
     );
-
     const summary: Record<string, SummaryItem> = {};
     monthTransactions.forEach((t: Transaction) => {
       const main = this.getMainCategory(t.category);
@@ -886,7 +751,6 @@ export class Budget implements OnInit {
       if (!summary[main]) {
         summary[main] = { allotted: 0, spent: 0, remain: 0 };
       }
-
       summary[main].spent += t.amount;
     });
 
@@ -902,25 +766,6 @@ export class Budget implements OnInit {
     });
 
     this.summary = summary;
-  }
-
-  updateSummary(expense: any) {
-    const data = JSON.parse(localStorage.getItem('smartbudget-data') || '{"summary":{}}');
-    if (!data.summary[expense.category]) {
-      data.summary[expense.category] = {
-        allotted: 0,     // or your planned value
-        spent: 0,
-        remain: 0
-      };
-    }
-    // Update spent
-    data.summary[expense.category].spent += expense.amount;
-    // Recalculate remain
-    data.summary[expense.category].remain =
-      data.summary[expense.category].allotted -
-      data.summary[expense.category].spent;
-    localStorage.setItem('smartbudget-data', JSON.stringify(data));
-    this.summary = data.summary;  // Refresh UI
   }
 
   getIcon(category: string) {
@@ -973,18 +818,65 @@ export class Budget implements OnInit {
 
     // 3️⃣ Add amounts to EXACT matching sub-category
     monthExpenses.forEach((t: Transaction) => {
+      const mainCategory = this.getMainCategory(t.category);
 
       const categoryGroup = this.allCategories.find(group =>
-        group.some(item => item.name === t.category)
+        group.some(item => item.name === mainCategory)
       );
+
       const categoryItem = categoryGroup?.find(
-        item => item.name === t.category
+        item => item.name === mainCategory
       );
+
       if (categoryItem) {
         const current = Number(categoryItem.received || 0);
         categoryItem.received = (current + t.amount).toFixed(2);
       }
     });
+  }
+
+  getProgressPercent(value: { spent: number; allotted: number }): number {
+    // No budget → show full bar as alert
+    if (value.allotted === 0) {
+      return 100;
+    }
+    const percent = (value.spent / value.allotted) * 100;
+    // Cap progress at 100%
+    return Math.min(percent, 100);
+  }
+
+  getProgressClass(value: { spent: number; allotted: number }): string {
+    // 🚨 No budget but spending exists
+    if (value.allotted === 0 && value.spent > 0) {
+      return 'red';
+    }
+    // ✅ Normal or exceeded budget (still green)
+    return 'green';
+  }
+
+  getReceivedClass(item: { planned: string; received: string }): string {
+    const planned = Number(item.planned) || 0;
+    const received =
+      item.received === '' || item.received == null
+        ? 0
+        : Number(item.received);
+
+    return received > planned ? 'exceed' : '';
+  }
+
+  getReceivedDisplay(item: { planned: string; received: string }): string {
+    const planned = Number(item.planned) || 0;
+    // ✅ Handle empty / undefined received
+    const received =
+      item.received === '' || item.received == null
+        ? 0
+        : Number(item.received);
+
+    if (received > planned) {
+      const extra = received - planned;
+      return `-₹ ${extra.toFixed(2)}`;
+    }
+    return `₹ ${received.toFixed(2)}`;
   }
 
 }
