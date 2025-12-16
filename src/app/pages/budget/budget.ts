@@ -355,7 +355,6 @@ export class Budget implements OnInit {
       this.allCategories.some(cat =>
         cat.some(i => Number(i.planned) > 0 || Number(i.received) > 0)
       );
-
     // Only show if at least one amount > 0
     return hasIncomeAmount || hasCategoryAmount;
   }
@@ -472,7 +471,6 @@ export class Budget implements OnInit {
 
   copyLatestBudgetForMonth() {
     let latestKey: string | null = null;
-
     // find latest budget (newest year+month)
     for (let year = 2030; year >= 2020; year--) {
       for (let m = 11; m >= 0; m--) {
@@ -516,39 +514,31 @@ export class Budget implements OnInit {
       this.food, this.personal, this.health, this.insurance, this.loan,
       this.entertainment, this.childcare
     ];
-
     allGroups.forEach(group => {
       group.forEach(item => {
         item.planned = '0.00';
         item.received = '0.00';
       });
     });
-    const data = JSON.parse(
-      localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}'
-    );
-
-    data.transactions = data.transactions.filter(
-      (t: Transaction) =>
-        !(t.month === this.selectedMonthIndex && t.year === this.selectedYear)
-    );
-
-    localStorage.setItem('smartbudget-data', JSON.stringify(data));
-
     this.hasEnteredAmount = false;
     this.amountLeft = 0;
     this.totalIncome = 0;
     this.totalPlannedExpenses = 0;
     this.saveBudget();
-    this.loadTransactions();
-    this.loadSummary();
     this.calculateTotals();
+    this.budgetShared.updateBudgetInfo({
+      totalIncome: 0,
+      totalPlannedExpenses: 0,
+      amountLeft: 0,
+      hasEnteredAmount: false,
+      shouldShowSummaryBox: false
+    });
     this.showSuccessPopup("All amounts were reset to ₹0.");
   }
 
   showSuccessPopup(msg: string) {
     this.successMessage = msg;
     this.successPopup = true;
-
     setTimeout(() => {
       this.successPopup = false;
     }, 2000); // auto-close after 2 sec
@@ -669,20 +659,16 @@ export class Budget implements OnInit {
   openPopup(type: 'income' | 'expense') {
     this.isEditMode = false;
     this.editingTransaction = null;
-
     this.popupType = type;
-
     this.form = {
       category: '',
       amount: 0,
       date: '',
       description: ''
     };
-
     this.onTypeChange();
     this.showPopup = true;
   }
-
 
   closePopup() {
     this.showPopup = false;
@@ -705,18 +691,13 @@ export class Budget implements OnInit {
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}'
     );
-
     const mainCategory = this.getMainCategory(this.form.category);
-
     if (this.isEditMode && this.editingTransaction) {
       const index = data.transactions.findIndex(
         (t: Transaction) => t.id === this.editingTransaction!.id
       );
-
       if (index === -1) return;
-
       const old = data.transactions[index];
-
       // 🔁 REVERSE OLD EFFECTS
       if (old.type === 'income') {
         const row = this.income.find(i => i.name === old.category);
@@ -726,7 +707,6 @@ export class Budget implements OnInit {
           ).toFixed(2);
         }
       }
-
       if (old.type === 'expense') {
         const oldMain = this.getMainCategory(old.category);
         if (data.summary[oldMain]) {
@@ -735,7 +715,6 @@ export class Budget implements OnInit {
             data.summary[oldMain].allotted - data.summary[oldMain].spent;
         }
       }
-
       // ✏️ CREATE UPDATED TRANSACTION
       const updated: Transaction = {
         ...old,
@@ -746,10 +725,8 @@ export class Budget implements OnInit {
         type: this.popupType,
         icon: this.getIcon(mainCategory)
       };
-
       // ✅ REPLACE in storage
       data.transactions[index] = updated;
-
       // ➕ APPLY NEW EFFECTS
       if (updated.type === 'income') {
         const row = this.income.find(i => i.name === updated.category);
@@ -759,12 +736,10 @@ export class Budget implements OnInit {
           ).toFixed(2);
         }
       }
-
       if (updated.type === 'expense') {
         if (!data.summary[mainCategory]) {
           data.summary[mainCategory] = { allotted: 0, spent: 0, remain: 0 };
         }
-
         data.summary[mainCategory].spent += updated.amount;
         data.summary[mainCategory].remain =
           data.summary[mainCategory].allotted -
@@ -773,7 +748,6 @@ export class Budget implements OnInit {
 
       this.showSuccess('Transaction updated successfully');
       localStorage.setItem('smartbudget-data', JSON.stringify(data));
-
       // 🔄 HARD reload from storage
       this.loadTransactions();
       this.loadSummary();
@@ -797,9 +771,7 @@ export class Budget implements OnInit {
         month: this.selectedMonthIndex,
         year: this.selectedYear
       };
-
       data.transactions.push(newItem);
-
       if (this.popupType === 'income') {
         const incomeRow = this.income.find(i => i.name === this.form.category);
         if (incomeRow) {
@@ -808,12 +780,10 @@ export class Budget implements OnInit {
           ).toFixed(2);
         }
       }
-
       if (this.popupType === 'expense') {
         if (!data.summary[mainCategory]) {
           data.summary[mainCategory] = { allotted: 0, spent: 0, remain: 0 };
         }
-
         data.summary[mainCategory].spent += newItem.amount;
         data.summary[mainCategory].remain =
           data.summary[mainCategory].allotted -
@@ -835,10 +805,10 @@ export class Budget implements OnInit {
     this.loadTransactions();
     this.loadSummary();
     this.updateExpenseReceivedFromTransactions();
-
     this.successPopup = true;
     this.closePopup();
   }
+
   showSuccess(message: string, duration = 2000) {
     this.successMessage = message;
     this.successPopup = true;
@@ -892,7 +862,6 @@ export class Budget implements OnInit {
       summary[cat].allotted = allotted;
       summary[cat].remain = allotted - summary[cat].spent;
     });
-
     this.summary = summary;
   }
 
