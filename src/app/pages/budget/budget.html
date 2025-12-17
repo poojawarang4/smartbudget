@@ -451,7 +451,8 @@
                       <p>Add your first income or expense to see it here.</p>
                     </div>
                     <div class="transactions-scroll">
-                      <div class="transaction-card" *ngFor="let t of transactions" (click)="editTransaction(t)">
+                      <div class="transaction-card" *ngFor="let t of transactions; let i = index"
+                        (click)="editTransaction(t)">
 
                         <div class="left">
                           <div class="icon-circle">
@@ -461,12 +462,24 @@
                             <div class="title">{{ t.category }}</div>
                             <div class="subtitle">{{ t.description }}</div>
 
-                          </div>
+                          </div> {{ t.amount | currency : 'INR'}}
                           <!-- <div class="subtitle">{{ t.date }}</div> -->
 
                         </div>
 
-                        <div class="amount">₹ {{ t.amount }}</div>
+                        <!-- <div class="amount">₹ {{ t.amount }}</div> -->
+                        <button class="delete-btn" (click)="openDeletePopup(i, $event)">
+                          🗑
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="confirm-overlay" *ngIf="showDeletePopup">
+                    <div class="confirm-box">
+                      <p>Delete this transaction?</p>
+                      <div class="actions1">
+                        <button class="yes" (click)="confirmDelete()">Yes</button>
+                        <button class="no" (click)="cancelDelete()">No</button>
                       </div>
                     </div>
                   </div>
@@ -486,15 +499,14 @@
                         <div class="left">
                           <div class="details">
                             <div class="summary-row">
-                            <div class="category">{{ s.key }}</div>
-                            <div class="subtext">₹{{ s.value.spent }} Out of ₹{{ s.value.allotted }}</div>
+                              <div class="category">{{ s.key }}</div>
+                              <div class="subtext">₹{{ s.value.spent }} Out of ₹{{ s.value.allotted }}</div>
                             </div>
                             <div class="progress">
                               <div class="progress-fill" [ngClass]="getProgressClass(s.value)"
                                 [style.width.%]="getProgressPercent(s.value)">
                               </div>
                             </div>
-
                           </div>
                         </div>
                       </div>
@@ -552,7 +564,6 @@
                         <button class="submit" (click)="submitTransaction()">
                           {{ isEditMode ? 'Update' : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
                         </button>
-
                       </div>
                     </div>
                   </div>

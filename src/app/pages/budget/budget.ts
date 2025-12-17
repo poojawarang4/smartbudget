@@ -40,6 +40,8 @@ interface SummaryItem {
 
 })
 export class Budget implements OnInit {
+  showDeletePopup = false;
+  deleteIndex: number | null = null;
   showPopup = false;
   popupType: 'income' | 'expense' = 'expense';
 
@@ -514,26 +516,21 @@ export class Budget implements OnInit {
       this.tranportation, this.food, this.personal, this.health,
       this.insurance, this.loan, this.entertainment, this.childcare
     ];
-
     allGroups.forEach(group => {
       group.forEach(item => {
         item.planned = '0.00';
         item.received = '0.00';
       });
     });
-
     // ✅ Save reset flag for this month
     const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
     localStorage.setItem(resetKey, 'true');
-
     this.hasEnteredAmount = false;
     this.amountLeft = 0;
     this.totalIncome = 0;
     this.totalPlannedExpenses = 0;
-
     this.saveBudget();
     this.calculateTotals();
-
     this.budgetShared.updateBudgetInfo({
       totalIncome: 0,
       totalPlannedExpenses: 0,
@@ -541,11 +538,8 @@ export class Budget implements OnInit {
       hasEnteredAmount: false,
       shouldShowSummaryBox: false
     });
-
     this.showSuccessPopup("Budget reset to ₹0.00");
   }
-
-
 
   showSuccessPopup(msg: string) {
     this.successMessage = msg;
@@ -759,7 +753,6 @@ export class Budget implements OnInit {
           data.summary[mainCategory].allotted -
           data.summary[mainCategory].spent;
       }
-
       this.showSuccess('Transaction updated successfully');
       localStorage.setItem('smartbudget-data', JSON.stringify(data));
       // 🔄 HARD reload from storage
@@ -773,7 +766,6 @@ export class Budget implements OnInit {
       // =========================
       // ➕ ADD TRANSACTION
       // =========================
-
       const newItem: Transaction = {
         id: Date.now().toString(),
         icon: this.getIcon(mainCategory),
@@ -806,14 +798,12 @@ export class Budget implements OnInit {
 
       // this.successMessage = 'Transaction added successfully';
       this.showSuccess('Transaction added successfully');
-
     }
 
     // =========================
     // 💾 SAVE & REFRESH
     // =========================
     localStorage.setItem('smartbudget-data', JSON.stringify(data));
-
     this.saveBudget();
     this.onAmountChange();
     this.loadTransactions();
@@ -826,7 +816,6 @@ export class Budget implements OnInit {
   showSuccess(message: string, duration = 2000) {
     this.successMessage = message;
     this.successPopup = true;
-
     setTimeout(() => {
       this.successPopup = false;
       this.successMessage = '';
@@ -909,23 +898,19 @@ export class Budget implements OnInit {
 
   updateExpenseReceivedFromTransactions() {
     const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
-
     // ❌ If budget was reset, do NOT recalc received
     if (localStorage.getItem(resetKey) === 'true') {
       return;
     }
-
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
     );
-
     // Reset received
     this.allCategories.forEach(group => {
       group.forEach(item => {
         item.received = '0.00';
       });
     });
-
     // Recalculate from transactions
     const monthExpenses: Transaction[] = data.transactions.filter(
       (t: Transaction) =>
@@ -933,25 +918,20 @@ export class Budget implements OnInit {
         t.month === this.selectedMonthIndex &&
         t.year === this.selectedYear
     );
-
     monthExpenses.forEach((t: Transaction) => {
       const mainCategory = this.getMainCategory(t.category);
-
       const categoryGroup = this.allCategories.find(group =>
         group.some(item => item.name === mainCategory)
       );
-
       const categoryItem = categoryGroup?.find(
         item => item.name === mainCategory
       );
-
       if (categoryItem) {
         const current = Number(categoryItem.received || 0);
         categoryItem.received = (current + t.amount).toFixed(2);
       }
     });
   }
-
 
   getProgressPercent(value: { spent: number; allotted: number }): number {
     // No budget → show full bar as alert
@@ -988,7 +968,6 @@ export class Budget implements OnInit {
       item.received === '' || item.received == null
         ? 0
         : Number(item.received);
-
     if (received > planned) {
       // const extra = received - planned;
       return `-₹ ${received.toFixed(2)}`;
@@ -1016,6 +995,39 @@ export class Budget implements OnInit {
   formatDate(date: string | Date): string {
     const d = new Date(date);
     return d.toISOString().split('T')[0];
+  }
+  openDeletePopup(index: number, event: Event) {
+    event.stopPropagation();
+    this.deleteIndex = index;
+    this.showDeletePopup = true;
+  }
+
+  cancelDelete() {
+    this.showDeletePopup = false;
+    this.deleteIndex = null;
+  }
+
+  confirmDelete() {
+    if (this.deleteIndex == null) return;
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[],"summary":{}}'
+    );
+    // remove from both UI + saved data
+    const t = this.transactions[this.deleteIndex];
+    // remove from UI
+    this.transactions.splice(this.deleteIndex, 1);
+    // remove from smartbudget-data.transactions
+    data.transactions = data.transactions.filter(
+      (x: any) => x.id !== t.id
+    );
+    localStorage.setItem('smartbudget-data', JSON.stringify(data));
+    // refresh UI
+    this.transactions = [...this.transactions];
+    this.loadSummary();
+    this.updateExpenseReceivedFromTransactions();
+    this.onAmountChange();
+    this.showDeletePopup = false;
+    this.deleteIndex = null;
   }
 
 }

@@ -774,6 +774,31 @@ h1 {
   border: none;
 }
 
+.actions1 {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.actions1 button {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.actions1 .yes {
+  background: #e93535;
+  color: white;
+}
+
+.actions1 .no {
+  background: #d1d5db;
+  color: black;
+}
+
 .fab {
   position: fixed;
   bottom: 40px;
@@ -871,22 +896,21 @@ h1 {
   justify-content: space-between;
   align-items: center;
   background: #fff;
-  padding: 15px;
+  padding: 10px;
   border-radius: 14px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .left {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
 }
 
 .icon-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 50px;
+  height: 25px;
   background: #eef3ff;
   display: flex;
   justify-content: center;
@@ -1127,7 +1151,6 @@ h1 {
 }
 
 .summary-row {
-  display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
@@ -1142,4 +1165,48 @@ h1 {
   font-size: 13px;
   color: #6b7280; // subtle gray
   white-space: nowrap;
+}
+
+.delete-btn {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 18px;
+  padding: 6px;
+  color: red;
+  margin-left: auto;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.confirm-box {
+  background: #fff;
+  padding: 20px 28px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 260px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.25);
+}
+
+.transaction-card {
+  transition: opacity .25s ease;
+}
+
+.transaction-card.removing {
+  opacity: 0;
 }
