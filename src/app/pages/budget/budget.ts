@@ -66,14 +66,7 @@ export class Budget implements OnInit {
       sub: [
         "Mortgage",
         "Rent",
-        "Water",
-        "Society Maintenance",
-        "Gas",
-        "Electricity",
-        "Trash",
-        "Cable",
-        "Wi-Fi",
-        "Phone"
+        "Water"
       ]
     },
     {
