@@ -1,8 +1,8 @@
-<div class="layout">
-  <app-sidebar></app-sidebar>
+<div class="layout" >
+  <app-sidebar [class.blurred]="blurActive"></app-sidebar>
 
   <div class="right-area">
-    <app-header></app-header>
+    <app-header [class.blurred]="blurActive"></app-header>
 
     <!-- Only center scrolls -->
     <div class="center-scroll">

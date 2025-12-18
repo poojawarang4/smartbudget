@@ -15,5 +15,7 @@ import { Header } from './layout/header/header';
   ]
 })
 export class App {
+  blurActive = false;
+
   // protected readonly title = signal('smartbudget');
 }

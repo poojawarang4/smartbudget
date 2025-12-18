@@ -10,6 +10,7 @@ import localeIn from '@angular/common/locales/en-IN';
 import { registerLocaleData } from '@angular/common';
 import { BudgetSharedService } from '../../layout/budget-shared.service';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { App } from '../../app';
 
 registerLocaleData(localeIn);
 
@@ -195,7 +196,9 @@ export class Budget implements OnInit {
 
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
-  constructor(private monthService: MonthService, private dialog: MatDialog, private budgetShared: BudgetSharedService) { }
+  constructor(private monthService: MonthService, private dialog: MatDialog, private budgetShared: BudgetSharedService,
+    private App: App
+  ) { }
 
   ngOnInit() {
     this.hasAnyBudget = this.checkIfAnyBudgetExists();
@@ -667,10 +670,12 @@ export class Budget implements OnInit {
     };
     this.onTypeChange();
     this.showPopup = true;
+    this.App.blurActive = true;
   }
 
   closePopup() {
     this.showPopup = false;
+    this.App.blurActive = false;
     this.isEditMode = false;
     this.editingTransaction = null;
     this.form = { category: '', amount: 0, date: '', description: '' };
@@ -984,6 +989,7 @@ export class Budget implements OnInit {
     // Update category dropdown
     this.onTypeChange();
     this.showPopup = true;
+    this.App.blurActive = true;
   }
 
   formatDate(date: string | Date): string {
@@ -994,11 +1000,13 @@ export class Budget implements OnInit {
     event.stopPropagation();
     this.deleteIndex = index;
     this.showDeletePopup = true;
+    this.App.blurActive = true;
   }
 
   cancelDelete() {
     this.showDeletePopup = false;
     this.deleteIndex = null;
+     this.App.blurActive = false;
   }
 
   confirmDelete() {
@@ -1022,6 +1030,7 @@ export class Budget implements OnInit {
     this.onAmountChange();
     this.showDeletePopup = false;
     this.deleteIndex = null;
+  this.App.blurActive = false;
   }
 
 }

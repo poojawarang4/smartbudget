@@ -28,3 +28,7 @@ app-header {
   overflow-y: auto;
   padding-right: 6px;     /* avoid cut content */
 }
+.blurred {
+  filter: blur(4px);
+  pointer-events: none; 
+}
