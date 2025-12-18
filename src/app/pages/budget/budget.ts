@@ -61,8 +61,18 @@ export class Budget implements OnInit {
   summary: Record<string, SummaryItem> = {};
 
   expenseCategories: any[] = [
-    { name: "Savings" },
-    { name: "Giving" },
+    {
+      name: "Savings",
+      sub: [
+        "Savings",
+      ]
+    },
+    {
+      name: "Giving",
+      sub: [
+        "Giving",
+      ]
+    },
     {
       name: "Housing",
       sub: [
@@ -79,15 +89,34 @@ export class Budget implements OnInit {
       name: "Food",
       sub: ["Groceries", "Restaurants"]
     },
-    { name: "Personal" },
-    { name: "Health" },
+    {
+      name: "Personal",
+      sub: [
+        "Personal",
+      ]
+    },
     {
       name: "Insurance",
       sub: ["Health", "Life"]
     },
-    { name: "Loan Repayment" },
-    { name: "Entertainment" },
-    { name: "Child Care" }
+    {
+      name: "Loan Repayment",
+      sub: [
+        "Loan Repayment",
+      ]
+    },
+    {
+      name: "Entertainment",
+      sub: [
+        "Entertainment",
+      ]
+    },
+    {
+      name: "Child Care",
+      sub: [
+        "Child Care",
+      ]
+    }
   ];
 
   selectedCategoryList: string[] = [];
@@ -166,10 +195,6 @@ export class Budget implements OnInit {
     { name: 'Personal', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
   ];
 
-  health = [
-    { name: 'Health', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
-  ];
-
   loan = [
     { name: 'Loan Repayment', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
   ];
@@ -219,7 +244,6 @@ export class Budget implements OnInit {
       this.tranportation || [],
       this.food || [],
       this.personal || [],
-      this.health || [],
       this.insurance || [],
       this.loan || [],
       this.entertainment || [],
@@ -276,7 +300,6 @@ export class Budget implements OnInit {
       ...this.savings,
       ...this.giving,
       ...this.personal,
-      ...this.health,
       ...this.loan,
       ...this.entertainment,
       ...this.childcare
@@ -392,7 +415,6 @@ export class Budget implements OnInit {
       this.savings = budget.savings;
       this.giving = budget.giving;
       this.personal = budget.personal;
-      this.health = budget.health;
       this.loan = budget.loan;
       this.entertainment = budget.entertainment;
       this.childcare = budget.childcare;
@@ -416,7 +438,6 @@ export class Budget implements OnInit {
       this.tranportation,
       this.food,
       this.personal,
-      this.health,
       this.insurance,
       this.loan,
       this.entertainment,
@@ -440,7 +461,6 @@ export class Budget implements OnInit {
     this.tranportation = resetArray(this.tranportation);
     this.food = resetArray(this.food);
     this.personal = resetArray(this.personal);
-    this.health = resetArray(this.health);
     this.insurance = resetArray(this.insurance);
     this.loan = resetArray(this.loan);
     this.entertainment = resetArray(this.entertainment);
@@ -459,7 +479,6 @@ export class Budget implements OnInit {
       tranportation: this.tranportation,
       food: this.food,
       personal: this.personal,
-      health: this.health,
       insurance: this.insurance,
       loan: this.loan,
       entertainment: this.entertainment,
@@ -510,7 +529,7 @@ export class Budget implements OnInit {
   resetAllAmountsToZero() {
     const allGroups = [
       this.income, this.savings, this.giving, this.housing,
-      this.tranportation, this.food, this.personal, this.health,
+      this.tranportation, this.food, this.personal,
       this.insurance, this.loan, this.entertainment, this.childcare
     ];
     allGroups.forEach(group => {
@@ -564,7 +583,6 @@ export class Budget implements OnInit {
       { name: 'Transportation', data: this.tranportation },
       { name: 'Food', data: this.food },
       { name: 'Personal', data: this.personal },
-      { name: 'Health', data: this.health },
       { name: 'Insurance', data: this.insurance },
       { name: 'Loan', data: this.loan },
       { name: 'Entertainment', data: this.entertainment },
@@ -685,9 +703,8 @@ export class Budget implements OnInit {
     if (this.popupType === "income") {
       this.selectedCategoryList = this.incomeCategories;
     } else {
-      this.selectedCategoryList = this.expenseCategories.flatMap(item =>
-        item.sub ? [item.name, ...item.sub] : [item.name]
-      );
+      this.selectedCategoryList = this.expenseCategories.filter(c => c.sub)
+        .flatMap(c => c.sub!);
     }
   }
 
@@ -716,12 +733,18 @@ export class Budget implements OnInit {
       }
       if (old.type === 'expense') {
         const oldMain = this.getMainCategory(old.category);
+
+        // 🔁 remove from accordion
+        this.updateExpenseAccordion(old.category, old.amount, 'remove');
+
+        // 🔁 remove from summary
         if (data.summary[oldMain]) {
           data.summary[oldMain].spent -= old.amount;
           data.summary[oldMain].remain =
             data.summary[oldMain].allotted - data.summary[oldMain].spent;
         }
       }
+
       // ✏️ CREATE UPDATED TRANSACTION
       const updated: Transaction = {
         ...old,
@@ -744,6 +767,10 @@ export class Budget implements OnInit {
         }
       }
       if (updated.type === 'expense') {
+        // ➕ add to accordion
+        this.updateExpenseAccordion(updated.category, updated.amount, 'add');
+
+        // ➕ add to summary
         if (!data.summary[mainCategory]) {
           data.summary[mainCategory] = { allotted: 0, spent: 0, remain: 0 };
         }
@@ -752,13 +779,16 @@ export class Budget implements OnInit {
           data.summary[mainCategory].allotted -
           data.summary[mainCategory].spent;
       }
+
       this.showSuccess('Transaction updated successfully');
       localStorage.setItem('smartbudget-data', JSON.stringify(data));
+      this.saveBudget()
+      this.onAmountChange()
       // 🔄 HARD reload from storage
       this.loadTransactions();
       this.loadSummary();
       this.updateExpenseReceivedFromTransactions();
-      this.onAmountChange();
+      // this.onAmountChange();
 
 
     } else {
@@ -777,25 +807,25 @@ export class Budget implements OnInit {
         year: this.selectedYear
       };
       data.transactions.push(newItem);
-      if (this.popupType === 'income') {
-        const incomeRow = this.income.find(i => i.name === this.form.category);
-        if (incomeRow) {
-          incomeRow.received = (
-            Number(incomeRow.received || 0) + newItem.amount
-          ).toFixed(2);
-        }
-      }
       if (this.popupType === 'expense') {
+        // ➕ accordion update
+        this.updateExpenseAccordion(
+          newItem.category,
+          newItem.amount,
+          'add'
+        );
+
+        // ➕ summary update
         if (!data.summary[mainCategory]) {
           data.summary[mainCategory] = { allotted: 0, spent: 0, remain: 0 };
         }
+
         data.summary[mainCategory].spent += newItem.amount;
         data.summary[mainCategory].remain =
           data.summary[mainCategory].allotted -
           data.summary[mainCategory].spent;
       }
 
-      // this.successMessage = 'Transaction added successfully';
       this.showSuccess('Transaction added successfully');
     }
 
@@ -810,6 +840,25 @@ export class Budget implements OnInit {
     this.updateExpenseReceivedFromTransactions();
     this.successPopup = true;
     this.closePopup();
+  }
+
+  updateExpenseAccordion(category: string, amount: number, mode: 'add' | 'remove') {
+    const delta = mode === 'add' ? amount : -amount;
+    const main = this.getMainCategory(category);
+
+    if (main === 'Housing') {
+      const row = this.housing.find(
+        (h: any) => h.name === category
+      );
+      if (row) row.received += delta;
+    }
+    if (main === 'Transportation') {
+      const row = this.tranportation.find(
+        (t: any) => t.name === category
+      );
+      if (row) row.received += delta;
+    }
+    // add others if needed (Food, Insurance, etc.)
   }
 
   showSuccess(message: string, duration = 2000) {
@@ -876,7 +925,6 @@ export class Budget implements OnInit {
       Savings: "💰",
       Housing: "🏠",
       Transportation: "🚗",
-      Health: "⚕️",
       Giving: "🎁"
     };
     return map[category] || "💡";
@@ -901,15 +949,18 @@ export class Budget implements OnInit {
     if (localStorage.getItem(resetKey) === 'true') {
       return;
     }
+    this.allCategories.forEach(group => {
+      group.forEach(item => (item.received = '0.00'));
+    });
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
     );
-    // Reset received
-    this.allCategories.forEach(group => {
-      group.forEach(item => {
-        item.received = '0.00';
-      });
-    });
+    // // Reset received
+    // this.allCategories.forEach(group => {
+    //   group.forEach(item => {
+    //     item.received = '0.00';
+    //   });
+    // });
     // Recalculate from transactions
     const monthExpenses: Transaction[] = data.transactions.filter(
       (t: Transaction) =>
@@ -917,17 +968,14 @@ export class Budget implements OnInit {
         t.month === this.selectedMonthIndex &&
         t.year === this.selectedYear
     );
-    monthExpenses.forEach((t: Transaction) => {
-      const mainCategory = this.getMainCategory(t.category);
-      const categoryGroup = this.allCategories.find(group =>
-        group.some(item => item.name === mainCategory)
-      );
-      const categoryItem = categoryGroup?.find(
-        item => item.name === mainCategory
-      );
-      if (categoryItem) {
-        const current = Number(categoryItem.received || 0);
-        categoryItem.received = (current + t.amount).toFixed(2);
+    monthExpenses.forEach(t => {
+      // Find the exact category/subcategory in budget arrays
+      for (let group of this.allCategories) {
+        const item = group.find(i => i.name === t.category); // match exact subcategory
+        if (item) {
+          item.received = (Number(item.received || 0) + t.amount).toFixed(2);
+          break; // stop after first match
+        }
       }
     });
   }
@@ -1006,7 +1054,7 @@ export class Budget implements OnInit {
   cancelDelete() {
     this.showDeletePopup = false;
     this.deleteIndex = null;
-     this.App.blurActive = false;
+    this.App.blurActive = false;
   }
 
   confirmDelete() {
@@ -1030,7 +1078,7 @@ export class Budget implements OnInit {
     this.onAmountChange();
     this.showDeletePopup = false;
     this.deleteIndex = null;
-  this.App.blurActive = false;
+    this.App.blurActive = false;
   }
 
 }

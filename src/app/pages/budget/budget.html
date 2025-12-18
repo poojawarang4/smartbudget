@@ -251,37 +251,6 @@
             </table>
           </div>
 
-          <!-- Health -->
-          <div class="card">
-            <table class="table">
-              <tr>
-                <th>Health</th>
-                <th>Planned</th>
-                <th>Received</th>
-              </tr>
-
-              <tr *ngFor="let item of health">
-                <td>{{ item.name }}</td>
-
-                <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
-                    (click)="editAmount(item, 'planned', false)">
-                    {{ item.planned | currency:'INR' }}
-                  </span>
-
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
-                </td>
-
-                <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
-                    {{ getReceivedDisplay(item) }}
-                  </span>
-                </td>
-              </tr>
-            </table>
-          </div>
-
           <!-- Insurance -->
           <div class="accordion-item" [class.open]="isOpeni">
             <div class="accordion-header" (click)="togglei()">
