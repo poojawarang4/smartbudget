@@ -9,6 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import localeIn from '@angular/common/locales/en-IN';
 import { registerLocaleData } from '@angular/common';
 import { BudgetSharedService } from '../../layout/budget-shared.service';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 registerLocaleData(localeIn);
 
@@ -30,7 +31,7 @@ interface SummaryItem {
 }
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule, MatGridListModule],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],

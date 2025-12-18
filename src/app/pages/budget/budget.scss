@@ -160,7 +160,6 @@
 
 .accordion.open .accordion-body {
   max-height: 500px;
-  /* enough height to expand */
 }
 
 .accordion.open .arrow {
@@ -227,6 +226,7 @@
 .amount {
   text-align: right;
   padding-right: 18px;
+  white-space: nowrap;
 }
 
 .row-head span:nth-child(2),
@@ -311,7 +311,6 @@ html {
   width: 100%;
   height: 1px;
   background: #e5e7eb;
-  /* light grey */
   margin: 15px 0;
 }
 
@@ -570,7 +569,6 @@ h1 {
 
   .icon {
     width: 260px;
-    // margin-bottom: 35px;
   }
 
   h1 {
@@ -691,7 +689,6 @@ h1 {
 .tabs button.active {
   color: #000;
   border-bottom: 3px solid #4CAF50;
-  /* light green */
 }
 
 .content {
@@ -892,14 +889,10 @@ h1 {
 }
 
 .transaction-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: #fff;
-  padding: 10px;
-  border-radius: 14px;
+  border-radius: 12px;
+  padding: 8px 10px;
   margin-bottom: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .left {
@@ -968,7 +961,7 @@ h1 {
 }
 
 .details .category {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1039,8 +1032,7 @@ h1 {
 }
 
 .right-summary {
-  height: 650px;
-  /* Set a fixed height for the card */
+  height: 550px;
   display: flex;
   flex-direction: column;
 }
@@ -1048,7 +1040,6 @@ h1 {
 .tab-pane {
   flex: 1;
   overflow-y: auto;
-  /* ✅ ONLY this scrolls */
   padding: 10px;
 }
 
@@ -1057,7 +1048,6 @@ h1 {
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   height: calc(100vh - 120px);
-  /* Keep full height minus header */
 }
 
 .left-section,
@@ -1086,9 +1076,14 @@ h1 {
   padding-right: 5px;
 }
 
+.right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .amount.exceed {
   color: #e74c3c;
-  /* red */
   font-weight: 600;
 }
 
@@ -1121,7 +1116,6 @@ h1 {
 
 .chart-empty {
   height: 240px;
-  /* same as pie chart */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1150,6 +1144,17 @@ h1 {
   cursor: pointer;
 }
 
+.transaction-grid {
+  height: 50px;
+  align-items: center;
+}
+
+mat-grid-tile {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
 .summary-row {
   justify-content: space-between;
   align-items: center;
@@ -1168,17 +1173,30 @@ h1 {
 }
 
 .delete-btn {
-  cursor: pointer;
+  background: transparent;
   border: none;
-  background: none;
+  cursor: pointer;
   font-size: 18px;
-  padding: 6px;
-  color: red;
   margin-left: auto;
+  color: red;
 
   &:hover {
     transform: scale(1.2);
   }
+}
+
+.left-tile {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center;
+  text-align: left !important;
+  padding-left: 8px;
+}
+
+.left-tile .mat-grid-tile-content {
+  justify-content: flex-start !important;
+  text-align: left !important;
+  padding-left: 8px;
 }
 
 .confirm-overlay {
@@ -1201,10 +1219,6 @@ h1 {
   text-align: center;
   min-width: 260px;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.25);
-}
-
-.transaction-card {
-  transition: opacity .25s ease;
 }
 
 .transaction-card.removing {

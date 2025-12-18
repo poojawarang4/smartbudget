@@ -453,24 +453,29 @@
                     <div class="transactions-scroll">
                       <div class="transaction-card" *ngFor="let t of transactions; let i = index"
                         (click)="editTransaction(t)">
-
-                        <div class="left">
+                        <mat-grid-list cols="12" rowHeight="40px" class="transaction-grid">
+                          <mat-grid-tile colspan="2" class="icon-circle">{{ t.date | date:'MMM dd'}}</mat-grid-tile>
+                          <mat-grid-tile colspan="5" class="left-tile">{{ t.category }}</mat-grid-tile>
+                          <mat-grid-tile colspan="3"> {{ t.amount | currency:'INR'}}</mat-grid-tile>
+                          <mat-grid-tile colspan="2"> <button class="delete-btn" (click)="openDeletePopup(i, $event)">
+                              🗑
+                            </button></mat-grid-tile>
+                        </mat-grid-list>
+                        <!-- <div class="left">
                           <div class="icon-circle">
                             <span class="icon">{{ t.date | date:'MMM dd'}}</span>
                           </div>
                           <div>
                             <div class="title">{{ t.category }}</div>
                             <div class="subtitle">{{ t.description }}</div>
-
-                          </div> {{ t.amount | currency : 'INR'}}
-                          <!-- <div class="subtitle">{{ t.date }}</div> -->
-
-                        </div>
-
-                        <!-- <div class="amount">₹ {{ t.amount }}</div> -->
-                        <button class="delete-btn" (click)="openDeletePopup(i, $event)">
-                          🗑
-                        </button>
+                          </div>
+                          <div class="amount">
+                            {{ t.amount | currency:'INR'}}
+                          </div>
+                          <button class="delete-btn" (click)="openDeletePopup(i, $event)">
+                            🗑
+                          </button>
+                        </div> -->
                       </div>
                     </div>
                   </div>
