@@ -982,11 +982,11 @@ h1 {
 }
 
 .progress-fill.green {
-  background: #3cb371;
+  background: #5be599;
 }
 
 .progress-fill.red {
-  background: #ff5c5c;
+  background: #ffcb5c;
 }
 
 .green-text {
@@ -1219,4 +1219,40 @@ mat-grid-tile {
 
 .transaction-card.removing {
   opacity: 0;
+}
+
+.category {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.value {
+  width: 100%;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.summary-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+::ng-deep mat-grid-tile {
+  background: transparent !important;
+}
+
+::ng-deep mat-grid-tile .mat-grid-tile-content {
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.left-align {
+  text-align: left;
+  justify-self: start;
 }

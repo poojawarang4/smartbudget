@@ -27,7 +27,6 @@
 
               <tr *ngFor="let item of income">
                 <td>{{ item.name }}</td>
-
                 <!-- Planned Editable -->
                 <td>
                   <!-- DISPLAY MODE -->
@@ -35,7 +34,6 @@
                     (click)="editAmount(item, 'planned', true)">
                     {{ item.planned | currency:'INR'}}
                   </span>
-
                   <!-- EDIT MODE -->
                   <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
                     (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
@@ -403,7 +401,6 @@
                 </div>
               </div>
               <button class="reset-btn" (click)="openResetPopup()">⟳ Reset Budget</button>
-
               <app-reset-budget-popup *ngIf="showResetPopup" (closePopup)="showResetPopup = false"
                 (makeZero)="resetAllAmountsToZero()" (copyLast)="copyLatestBudgetForMonth()">
               </app-reset-budget-popup>
@@ -424,33 +421,15 @@
                         (click)="editTransaction(t)">
                         <mat-grid-list cols="12" rowHeight="40px" class="transaction-grid">
                           <mat-grid-tile colspan="2" class="icon-circle">{{ t.date | date:'MMM dd'}}</mat-grid-tile>
-                          <mat-grid-tile colspan="5" class="left-tile">{{ t.category }}</mat-grid-tile>
-                          <mat-grid-tile colspan="3"> {{ t.amount | currency:'INR'}}</mat-grid-tile>
-                          <mat-grid-tile colspan="2"> <button class="delete-btn" (click)="openDeletePopup(i, $event)">
-                              🗑
-                            </button></mat-grid-tile>
+                          <mat-grid-tile colspan="6" class="left-tile">{{ t.category }}</mat-grid-tile>
+                          <mat-grid-tile colspan="4"> {{ t.amount | currency:'INR'}}</mat-grid-tile>
                         </mat-grid-list>
-                        <!-- <div class="left">
-                          <div class="icon-circle">
-                            <span class="icon">{{ t.date | date:'MMM dd'}}</span>
-                          </div>
-                          <div>
-                            <div class="title">{{ t.category }}</div>
-                            <div class="subtitle">{{ t.description }}</div>
-                          </div>
-                          <div class="amount">
-                            {{ t.amount | currency:'INR'}}
-                          </div>
-                          <button class="delete-btn" (click)="openDeletePopup(i, $event)">
-                            🗑
-                          </button>
-                        </div> -->
                       </div>
                     </div>
                   </div>
                   <div class="confirm-overlay" *ngIf="showDeletePopup">
                     <div class="confirm-box">
-                      <p>Delete this transaction?</p>
+                      <p>Are you sure want to delete this transaction?</p>
                       <div class="actions1">
                         <button class="yes" (click)="confirmDelete()">Yes</button>
                         <button class="no" (click)="cancelDelete()">No</button>
@@ -458,7 +437,6 @@
                     </div>
                   </div>
                   <button class="fab" (click)="openPopup(popupType)"> + </button>
-
                   <!-- Right: Summary -->
                   <div class="summary-box card">
                     <h3>Summary</h3>
@@ -467,94 +445,102 @@
                       <h4>No summary available</h4>
                       <p>Summary will appear once transactions are added.</p>
                     </div>
-                    <div class="transactions-scroll">
-                      <div class="transaction-card" *ngFor="let s of summary | keyvalue">
-
-                        <div class="left">
-                          <div class="details">
-                            <div class="summary-row">
-                              <div class="category">{{ s.key }}</div>
-                              <div class="subtext">₹{{ s.value.spent }} Out of ₹{{ s.value.allotted }}</div>
-                            </div>
-                            <div class="progress">
-                              <div class="progress-fill" [ngClass]="getProgressClass(s.value)"
-                                [style.width.%]="getProgressPercent(s.value)">
-                              </div>
+                    <div class="summary-card" *ngFor="let s of summary | keyvalue">
+                      <mat-grid-list cols="2" rowHeight="15px" gutterSize="8px">
+                        <!-- Row 1 : Category -->
+                        <mat-grid-tile>
+                          <div class="category left-align">
+                            {{ s.key }}
+                          </div>
+                        </mat-grid-tile>
+                        <!-- Row 1 : Amount -->
+                        <mat-grid-tile>
+                          <div class="value" [ngClass]="getProgressClass(s.value) + '-text'">
+                            ₹{{ s.value.spent }} Out of ₹{{ s.value.allotted }}
+                          </div>
+                        </mat-grid-tile>
+                        <!-- Row 2 : Progress bar (full width) -->
+                        <mat-grid-tile colspan="2">
+                          <div class="progress">
+                            <div class="progress-fill" [ngClass]="getProgressClass(s.value)"
+                              [style.width.%]="getProgressPercent(s.value)">
                             </div>
                           </div>
-                        </div>
-                      </div>
+                        </mat-grid-tile>
+                      </mat-grid-list>
                     </div>
                   </div>
-                </div>
 
-                <!-- Popup -->
-                <div class="popup-backdrop" *ngIf="showPopup">
-                  <div class="popup">
-                    <div class="popup-header">
-                      <h3>
-                        {{ isEditMode
-                        ? (popupType === 'income' ? 'Edit Income' : 'Edit Expense')
-                        : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
-                      </h3>
-                      <span class="close" (click)="closePopup()">✕</span>
-                    </div>
-                    <div class="toggle">
-                      <label>
-                        <input type="radio" name="type" value="income" [(ngModel)]="popupType"
-                          (change)="onTypeChange()" />
-                        Income
-                      </label>
-                      <label>
-                        <input type="radio" name="type" value="expense" [(ngModel)]="popupType"
-                          (change)="onTypeChange()" />
-                        Expense
-                      </label>
-                    </div>
-                    <div class="form">
-                      <div class="form-group">
-                        <label>Category</label>
-                        <select [(ngModel)]="form.category">
-                          <option *ngFor="let c of selectedCategoryList">{{ c }}</option>
-                        </select>
+                  <!-- Popup -->
+                  <div class="popup-backdrop" *ngIf="showPopup">
+                    <div class="popup">
+                      <div class="popup-header">
+                        <h3>
+                          {{ isEditMode
+                          ? (popupType === 'income' ? 'Edit Income' : 'Edit Expense')
+                          : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
+                        </h3>
+                        <span class="close" (click)="closePopup()">✕</span>
                       </div>
-                      <div class="row">
-                        <div class="form-group half">
-                          <label>Amount</label>
-                          <input type="number" [(ngModel)]="form.amount" />
+                      <div class="toggle">
+                        <label>
+                          <input type="radio" name="type" value="income" [(ngModel)]="popupType"
+                            (change)="onTypeChange()" />
+                          Income
+                        </label>
+                        <label>
+                          <input type="radio" name="type" value="expense" [(ngModel)]="popupType"
+                            (change)="onTypeChange()" />
+                          Expense
+                        </label>
+                      </div>
+                      <div class="form">
+                        <div class="form-group">
+                          <label>Category</label>
+                          <select [(ngModel)]="form.category">
+                            <option *ngFor="let c of selectedCategoryList">{{ c }}</option>
+                          </select>
                         </div>
-                        <div class="form-group half">
-                          <label>Date</label>
-                          <input type="date" [(ngModel)]="form.date" />
+                        <div class="row">
+                          <div class="form-group half">
+                            <label>Amount</label>
+                            <input type="number" [(ngModel)]="form.amount" />
+                          </div>
+                          <div class="form-group half">
+                            <label>Date</label>
+                            <input type="date" [(ngModel)]="form.date" />
+                          </div>
                         </div>
-                      </div>
-                      <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" [(ngModel)]="form.description"
-                          [placeholder]="popupType==='income' ? 'Where did this money come from?' : 'Where did you spend this money?'" />
-                      </div>
-                      <div class="actions">
-                        <button class="cancel" (click)="closePopup()">Cancel</button>
-                        <button class="submit" (click)="submitTransaction()">
-                          {{ isEditMode ? 'Update' : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
-                        </button>
+                        <div class="form-group">
+                          <label>Description</label>
+                          <input type="text" [(ngModel)]="form.description"
+                            [placeholder]="popupType==='income' ? 'Where did this money come from?' : 'Where did you spend this money?'" />
+                        </div>
+                        <div class="actions">
+                          <button *ngIf="isEditMode" class="cancel" (click)="openDeletePopupFromEdit()">
+                            Delete
+                          </button>
+                          <button class="cancel" (click)="closePopup()">Cancel</button>
+                          <button class="submit" (click)="submitTransaction()">
+                            {{ isEditMode ? 'Update' : (popupType === 'income' ? 'Add Income' : 'Add Expense') }}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <!-- POPUP EDIT BOX -->
+              <div class="left-toast" *ngIf="showLeftToast">
+                {{ leftMessage }}
+              </div>
             </div>
-            <!-- POPUP EDIT BOX -->
-            <div class="left-toast" *ngIf="showLeftToast">
-              {{ leftMessage }}
-            </div>
-          </div>
 
-          <div class="success-popup" *ngIf="successPopup">
-            {{ successMessage }}
+            <div class="success-popup" *ngIf="successPopup">
+              {{ successMessage }}
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
