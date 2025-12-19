@@ -1231,6 +1231,7 @@ h1 {
   text-align: right;
   font-size: 12px;
   font-weight: 600;
+  padding-right: 10px;
 }
 
 .summary-card {
@@ -1241,8 +1242,10 @@ h1 {
 }
 
 ::ng-deep mat-grid-tile .mat-grid-tile-content {
-  font-size: 13px;
-  font-weight: 600;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 2px 5px 2px 5px;
 }
 
 .left-align {
