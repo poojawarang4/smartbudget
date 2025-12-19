@@ -898,10 +898,14 @@ h1 {
 }
 
 .icon-circle {
-  width: 50px;
-  height: 25px;
   background: #eef3ff;
-  display: flex;
+  border-radius: 6px;
+}
+
+.icon-circle .mat-grid-tile-content {
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: 500;
   justify-content: center;
   align-items: center;
 }
@@ -1145,11 +1149,11 @@ h1 {
   align-items: center;
 }
 
-mat-grid-tile {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-}
+// mat-grid-tile {
+//   display: flex;
+//   align-items: center;
+//   font-size: 12px;
+// }
 
 .summary-row {
   justify-content: space-between;
@@ -1160,12 +1164,6 @@ mat-grid-tile {
 .category {
   font-weight: 600;
   font-size: 15px;
-}
-
-.amount-text {
-  font-size: 13px;
-  color: #6b7280; // subtle gray
-  white-space: nowrap;
 }
 
 .delete-btn {
@@ -1192,7 +1190,7 @@ mat-grid-tile {
 .left-tile .mat-grid-tile-content {
   justify-content: flex-start !important;
   text-align: left !important;
-  padding-left: 8px;
+  padding-left: 14px;
 }
 
 .confirm-overlay {
@@ -1243,12 +1241,24 @@ mat-grid-tile {
 }
 
 ::ng-deep mat-grid-tile .mat-grid-tile-content {
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .left-align {
   text-align: left;
   justify-self: start;
+}
+
+.amount-tile .mat-grid-tile-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.amount-text {
+  margin-left: auto;
+  padding-right: 16px;
+  font-weight: 600;
+  white-space: nowrap;
 }

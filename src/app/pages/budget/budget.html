@@ -420,9 +420,11 @@
                       <div class="transaction-card" *ngFor="let t of transactions; let i = index"
                         (click)="editTransaction(t)">
                         <mat-grid-list cols="12" rowHeight="40px" class="transaction-grid">
-                          <mat-grid-tile colspan="2" class="icon-circle">{{ t.date | date:'MMM dd'}}</mat-grid-tile>
-                          <mat-grid-tile colspan="6" class="left-tile">{{ t.category }}</mat-grid-tile>
-                          <mat-grid-tile colspan="4"> {{ t.amount | currency:'INR'}}</mat-grid-tile>
+                          <mat-grid-tile colspan="3" class="icon-circle">{{ t.date | date:'MMM dd'}}</mat-grid-tile>
+                          <mat-grid-tile colspan="5" class="left-tile">{{ t.category }}</mat-grid-tile>
+                          <mat-grid-tile colspan="4" class="amount-tile"> <span class="amount-text">
+                              {{ t.amount | currency:'INR':'symbol':'1.0-0' }}
+                            </span></mat-grid-tile>
                         </mat-grid-list>
                       </div>
                     </div>
