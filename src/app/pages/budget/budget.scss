@@ -1242,10 +1242,6 @@ mat-grid-tile {
   margin-bottom: 12px;
 }
 
-::ng-deep mat-grid-tile {
-  background: transparent !important;
-}
-
 ::ng-deep mat-grid-tile .mat-grid-tile-content {
   justify-content: space-between;
   align-items: center;
