@@ -892,14 +892,21 @@ export class Budget implements OnInit {
     });
     // Attach allotted from budget
     Object.keys(summary).forEach(cat => {
-      const group = this.allCategories.find(g =>
-        g.some(i => i.name === cat)
-      );
-      const allotted =
-        group?.reduce((sum, i) => sum + Number(i.planned || 0), 0) || 0;
+      let allotted = 0;
+
+      this.allCategories.forEach(group => {
+        group.forEach(item => {
+          // map subcategory → main category
+          if (this.getMainCategory(item.name) === cat) {
+            allotted += Number(item.planned || 0);
+          }
+        });
+      });
+
       summary[cat].allotted = allotted;
       summary[cat].remain = allotted - summary[cat].spent;
     });
+
     this.summary = summary;
   }
 
