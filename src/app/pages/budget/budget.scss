@@ -228,6 +228,10 @@
   padding-right: 18px;
   white-space: nowrap;
 }
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
 
 .row-head span:nth-child(2),
 .row-head span:nth-child(3),

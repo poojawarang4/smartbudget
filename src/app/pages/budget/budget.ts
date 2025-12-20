@@ -11,6 +11,7 @@ import { registerLocaleData } from '@angular/common';
 import { BudgetSharedService } from '../../layout/budget-shared.service';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { App } from '../../app';
+import { AutoFocusDirective } from '../../auto-focus-directive';
 
 registerLocaleData(localeIn);
 
@@ -32,7 +33,9 @@ interface SummaryItem {
 }
 @Component({
   selector: 'app-budget',
-  imports: [CommonModule, FormsModule, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule, MatGridListModule],
+  imports: [CommonModule, FormsModule, ResetBudgetPopupComponent, NgChartsModule, MatDialogModule, MatGridListModule,
+    AutoFocusDirective
+  ],
   standalone: true,
   templateUrl: './budget.html',
   styleUrls: ['./budget.scss'],
@@ -320,26 +323,29 @@ export class Budget implements OnInit {
       this.budgetStatus = "Amount over budget";
     }
   }
+hasPlannedIncome(): boolean {
+   return this.income.some(inc =>
+    inc.planned !== null &&
+    inc.planned !== undefined &&
+    inc.planned !== '' &&
+    Number(inc.planned) > 0
+  );
+}
 
   editAmount(item: any, field: 'planned' | 'received', isIncome: boolean) {
-    this.incomeTotal = this.income.reduce(
-      (sum, inc) => sum + Number(inc.planned || 0),
-      0
-    );
-    if (!isIncome && this.incomeTotal <= 0) {
-      this.leftMessage = "Please Enter Income First";
-      this.showLeftToast = true;
-      setTimeout(() => (this.showLeftToast = false), 2000);
-      return;
-    }
-    // Turn ON edit mode
-    const editKey = 'edit' + this.capitalize(field);
-    item[editKey] = true;
+    if (!isIncome && !this.hasPlannedIncome()) {
+    this.leftMessage = 'Please Enter Income First';
+    this.showLeftToast = true;
+    setTimeout(() => (this.showLeftToast = false), 2000);
+    return;
+  }
 
-    // Clear input if value is 0 or "0.00"
-    if (Number(item[field]) === 0) {
-      item[field] = '';
-    }
+  const editKey = 'edit' + this.capitalize(field);
+  item[editKey] = true;
+
+  if (Number(item[field]) === 0) {
+    item[field] = ''; 
+  }
   }
 
   // ✅ Correct helper method inside class

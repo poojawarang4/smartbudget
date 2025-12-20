@@ -35,8 +35,8 @@
                     {{ item.planned | currency:'INR'}}
                   </span>
                   <!-- EDIT MODE -->
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
                 <!-- Received Editable -->
                 <td>
@@ -61,13 +61,13 @@
                 <td>{{ item.name }}</td>
 
                 <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                     (click)="editAmount(item, 'planned', false)">
                     {{ item.planned | currency:'INR' }}
                   </span>
 
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
 
                 <td>
@@ -93,13 +93,13 @@
                 <td>{{ item.name }}</td>
 
                 <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                     (click)="editAmount(item, 'planned', false)">
                     {{ item.planned | currency:'INR' }}
                   </span>
 
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
 
                 <td>
@@ -133,13 +133,13 @@
               <!-- TABLE ROWS -->
               <div class="row-item" *ngFor="let item of housing">
                 <span>{{ item.name }}</span>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                   (click)="editAmount(item, 'planned',false)">
                   {{ item.planned | currency:'INR' }}
                 </span>
 
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
 
                 <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
                   {{ getReceivedDisplay(item) }}
@@ -170,13 +170,13 @@
               <!-- TABLE ROWS -->
               <div class="row-item" *ngFor="let item of tranportation">
                 <span>{{ item.name }}</span>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                   (click)="editAmount(item, 'planned',false)">
                   {{ item.planned | currency:'INR' }}
                 </span>
 
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
 
                 <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
                   {{ getReceivedDisplay(item) }}
@@ -203,13 +203,13 @@
               <!-- TABLE ROWS -->
               <div class="row-item" *ngFor="let item of food">
                 <span>{{ item.name }}</span>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                   (click)="editAmount(item, 'planned',false)">
                   {{ item.planned | currency:'INR' }}
                 </span>
 
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
 
                 <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
                   {{ getReceivedDisplay(item) }}
@@ -231,13 +231,13 @@
                 <td>{{ item.name }}</td>
 
                 <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                     (click)="editAmount(item, 'planned', false)">
                     {{ item.planned | currency:'INR' }}
                   </span>
 
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
 
                 <td>
@@ -267,13 +267,13 @@
               <!-- TABLE ROWS -->
               <div class="row-item" *ngFor="let item of insurance">
                 <span>{{ item.name }}</span>
-                <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                   (click)="editAmount(item, 'planned',false)">
                   {{ item.planned | currency:'INR' }}
                 </span>
 
-                <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                  (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
 
                 <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
                   {{ getReceivedDisplay(item) }}
@@ -295,13 +295,13 @@
                 <td>{{ item.name }}</td>
 
                 <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                     (click)="editAmount(item, 'planned', false)">
                     {{ item.planned | currency:'INR' }}
                   </span>
 
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
 
                 <td>
@@ -326,13 +326,13 @@
                 <td>{{ item.name }}</td>
 
                 <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                     (click)="editAmount(item, 'planned', false)">
                     {{ item.planned | currency:'INR' }}
                   </span>
 
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
 
                 <td>
@@ -357,13 +357,13 @@
                 <td>{{ item.name }}</td>
 
                 <td>
-                  <span *ngIf="!item.editPlanned" class="amount clickable-amount"
+                  <span *ngIf="!item.editPlanned" class="amount clickable-amount" [class.disabled]="!hasPlannedIncome()"
                     (click)="editAmount(item, 'planned', false)">
                     {{ item.planned | currency:'INR' }}
                   </span>
 
-                  <input *ngIf="item.editPlanned" type="number" [(ngModel)]="item.planned"
-                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" autofocus />
+                  <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
+                    (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')"/>
                 </td>
 
                 <td>
@@ -448,7 +448,7 @@
                       <p>Summary will appear once transactions are added.</p>
                     </div>
                     <div class="summary-card" *ngFor="let s of summary | keyvalue">
-                      <mat-grid-list cols="2" rowHeight="15px" gutterSize="8px">
+                      <mat-grid-list cols="2" rowHeight="30px" gutterSize="8px">
                         <!-- Row 1 : Category -->
                         <mat-grid-tile>
                           <div class="category left-align">
