@@ -369,6 +369,7 @@ hasPlannedIncome(): boolean {
     // Close edit mode
     item["edit" + this.capitalize(type)] = false;
     // Recalculate UI + save
+    this.loadSummary();
     this.onAmountChange();
     this.calculateSummaryPieChart();
     this.saveBudget();  // Save month-wise
