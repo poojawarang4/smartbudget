@@ -323,29 +323,29 @@ export class Budget implements OnInit {
       this.budgetStatus = "Amount over budget";
     }
   }
-hasPlannedIncome(): boolean {
-   return this.income.some(inc =>
-    inc.planned !== null &&
-    inc.planned !== undefined &&
-    inc.planned !== '' &&
-    Number(inc.planned) > 0
-  );
-}
+  hasPlannedIncome(): boolean {
+    return this.income.some(inc =>
+      inc.planned !== null &&
+      inc.planned !== undefined &&
+      inc.planned !== '' &&
+      Number(inc.planned) > 0
+    );
+  }
 
   editAmount(item: any, field: 'planned' | 'received', isIncome: boolean) {
     if (!isIncome && !this.hasPlannedIncome()) {
-    this.leftMessage = 'Please Enter Income First';
-    this.showLeftToast = true;
-    setTimeout(() => (this.showLeftToast = false), 2000);
-    return;
-  }
+      this.leftMessage = 'Please Enter Income First';
+      this.showLeftToast = true;
+      setTimeout(() => (this.showLeftToast = false), 2000);
+      return;
+    }
 
-  const editKey = 'edit' + this.capitalize(field);
-  item[editKey] = true;
+    const editKey = 'edit' + this.capitalize(field);
+    item[editKey] = true;
 
-  if (Number(item[field]) === 0) {
-    item[field] = ''; 
-  }
+    if (Number(item[field]) === 0) {
+      item[field] = '';
+    }
   }
 
   // ✅ Correct helper method inside class
@@ -714,6 +714,11 @@ hasPlannedIncome(): boolean {
   }
 
   submitTransaction() {
+    const transactionDate =
+      this.form.date && this.form.date.trim() !== ''
+        ? this.form.date
+        : new Date().toISOString().split('T')[0]; // today
+
     const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
     localStorage.removeItem(resetKey);
     const data = JSON.parse(
@@ -800,7 +805,7 @@ hasPlannedIncome(): boolean {
         type: this.popupType,
         category: this.form.category,
         amount: Number(this.form.amount),
-        date: this.form.date,
+        date: transactionDate,
         description: this.form.description,
         month: this.selectedMonthIndex,
         year: this.selectedYear
@@ -873,9 +878,11 @@ hasPlannedIncome(): boolean {
         t.month === this.selectedMonthIndex &&
         t.year === this.selectedYear
       )
-      .sort((a: Transaction, b: Transaction) =>
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
+      .sort((a: Transaction, b: Transaction) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+      });
   }
 
   loadSummary() {
@@ -1006,12 +1013,15 @@ hasPlannedIncome(): boolean {
   }
 
   getProgressClass(value: { spent: number; allotted: number }): string {
-    // 🚨 No budget but spending exists
     if (value.allotted === 0 && value.spent > 0) {
       return 'red';
     }
-    // ✅ Normal or exceeded budget (still green)
-    return 'green';
+    // Over budget
+    if (value.spent > value.allotted) {
+      return 'red';
+    }
+    // Within budget
+    return 'green';;
   }
 
   getReceivedClass(item: { planned: string; received: string }): string {
@@ -1056,7 +1066,16 @@ hasPlannedIncome(): boolean {
   }
 
   formatDate(date: string | Date): string {
+    if (!date) {
+      return '';
+    }
+
     const d = new Date(date);
+
+    if (isNaN(d.getTime())) {
+      return '';
+    }
+
     return d.toISOString().split('T')[0];
   }
 
