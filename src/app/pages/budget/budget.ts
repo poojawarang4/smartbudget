@@ -49,6 +49,7 @@ export class Budget implements OnInit {
   deleteIndex: number | null = null;
   showPopup = false;
   popupType: 'income' | 'expense' = 'expense';
+  selectedSource: any = null;
 
   incomeCategories: string[] = [
     "Salary 1",
@@ -1124,5 +1125,58 @@ export class Budget implements OnInit {
     this.deleteIndex = null;
     this.App.blurActive = false;
   }
+getOverBudgetAmount(item: any): number {
+  const planned = Number(item.planned) || 0;
+  const received = Number(item.received) || 0;
+  return received > planned ? received - planned : 0;
+}
+getSurplusSuggestions(target: any) {
+  return this.allCategories
+    .flat()
+    .filter(i =>
+      Number(i.planned) > Number(i.received)
+    )
+    .map(i => ({
+      name: i.name,
+      available: Number(i.planned) - Number(i.received)
+    }))
+    .sort((a, b) => b.available - a.available)
+    .slice(0, 3);
+}
 
+reallocateBudget(target: any) {
+  let gap = this.getOverBudgetAmount(target);
+  if (gap <= 0) return;
+
+  const surplusItems = this.allCategories.flat();
+
+  for (const source of surplusItems) {
+    if (gap <= 0) break;
+
+    const available =
+      Number(source.planned) - Number(source.received);
+
+    if (available <= 0) continue;
+
+    const move = Math.min(available, gap);
+
+    source.planned = Number(source.planned) - move;
+    target.planned = Number(target.planned) + move;
+
+    gap -= move;
+  }
+  this.saveBudget();
+  this.onAmountChange();
+  this.calculateSummaryPieChart();
+}
+
+confirmReallocate(target: any) {
+  if (!this.selectedSource) return;
+  const amount = this.getOverBudgetAmount(target);
+  this.selectedSource.planned -= amount;
+  target.planned += amount;
+  this.selectedSource = null;
+  this.saveBudget();
+  this.onAmountChange();
+}
 }

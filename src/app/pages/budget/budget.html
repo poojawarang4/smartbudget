@@ -240,11 +240,40 @@
                     (blur)="finishEdit(item, 'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
                 </td>
 
-                <td>
-                  <span *ngIf="!item.editReceived" class="amount clickable-amount" [ngClass]="getReceivedClass(item)">
-                    {{ getReceivedDisplay(item) }}
-                  </span>
-                </td>
+           <td class="received-cell">
+  <span class="amount exceed-trigger"
+        [class.exceed]="getOverBudgetAmount(item) > 0">
+
+    {{ getReceivedDisplay(item) }}
+  </span>
+
+  <!-- RIGHT SIDE FLOATING TOOLTIP -->
+  <div class="side-tooltip"
+       *ngIf="getOverBudgetAmount(item) > 0">
+
+    <div class="tooltip-header">
+      Over budget by ₹{{ getOverBudgetAmount(item) | number:'1.0-0' }}
+    </div>
+
+    <div class="tooltip-body">
+     <p class="hint">Choose a category:</p>
+
+  <label *ngFor="let s of getSurplusSuggestions(item)">
+    <input type="radio"
+           name="sourceCategory"
+           [value]="s"
+           [(ngModel)]="selectedSource" />
+    {{ s.name }} (₹{{ s.available }})
+  </label>
+    </div>
+
+    <button class="tooltip-action"
+            (click)="reallocateBudget(item)">
+      Reallocate Budget
+    </button>
+  </div>
+</td>
+
               </tr>
             </table>
           </div>
