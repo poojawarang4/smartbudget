@@ -639,45 +639,55 @@ export class Budget implements OnInit {
         legend: {
           display: false,
         },
-        tooltip: {
-          callbacks: {
-            label: (context: any) => {
-              const categoryName = context.label;
-              // Skip "Remaining"
-              if (categoryName === "Remaining") {
-                return `Remaining – ${context.raw}%`;
-              }
-              const index = context.dataIndex;
-              // Find category object
-              const category = categories.find(c => c.name === categoryName);
-              const items = category?.data || [];
-              // Total amount for this category
-              const totalCategoryAmount = values[index];
-              // % of total income
-              const categoryPercent = context.raw;
-              // Format amount
-              const formattedCategoryTotal = new Intl.NumberFormat('en-IN', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              }).format(totalCategoryAmount);
-              // Build hierarchical breakdown
-              let breakdown = `${categoryName} – ₹${formattedCategoryTotal} (${categoryPercent}%)\n`;
-              items.forEach(item => {
-                const amt = Number(item.planned || 0);
-                const percentInsideCategory =
-                  totalCategoryAmount > 0
-                    ? ((amt / totalCategoryAmount) * 100).toFixed(1)
-                    : 0;
-                const formattedAmt = new Intl.NumberFormat('en-IN', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }).format(amt);
-                breakdown += `\n• ${item.name} – ₹${formattedAmt} (${percentInsideCategory}%)`;
-              });
-              return breakdown;
-            }
-          }
-        }
+ tooltip: {
+  callbacks: {
+    label: (context: any) => {
+      const categoryName = context.label;
+
+      // Skip Remaining
+      if (categoryName === 'Remaining') {
+        return `Remaining – ${context.raw}%`;
+      }
+
+      const index = context.dataIndex;
+      const category = categories.find(c => c.name === categoryName);
+      const items = category?.data || [];
+      const totalCategoryAmount = values[index];
+      const categoryPercent = context.raw;
+
+      const formatter = new Intl.NumberFormat('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      // 🔹 Tooltip lines (each item = new line)
+      const lines: string[] = [];
+
+      // Main category line
+      lines.push(
+        `${categoryName} — ₹${formatter.format(totalCategoryAmount)} (${categoryPercent}%)`
+      );
+
+      // Sub-category lines
+      items.forEach(item => {
+        const amt = Number(item.planned || 0);
+        if (amt === 0) return;
+
+        const percentInsideCategory =
+          totalCategoryAmount > 0
+            ? ((amt / totalCategoryAmount) * 100).toFixed(1)
+            : '0';
+
+        lines.push(
+          `• ${item.name}: ₹${formatter.format(amt)} (${percentInsideCategory}%)`
+        );
+      });
+
+      return lines; // ✅ THIS IS THE KEY FIX
+    }
+  }
+}
+
       }
     };
   }
