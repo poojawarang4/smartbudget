@@ -408,6 +408,7 @@ export class Budget implements OnInit {
   }
 
   loadBudgetForMonth(forceCreate: boolean = false) {
+    this.activeTab = 'summary';
     const key = this.getMonthKey()
     const savedData = localStorage.getItem(key);
     if (savedData) {
@@ -1069,26 +1070,20 @@ export class Budget implements OnInit {
     if (!date) {
       return '';
     }
-
     const d = new Date(date);
-
     if (isNaN(d.getTime())) {
       return '';
     }
-
     return d.toISOString().split('T')[0];
   }
 
   openDeletePopupFromEdit() {
     this.showPopup = false;
     if (!this.editingTransaction) return;
-
     const index = this.transactions.findIndex(
       t => t.id === this.editingTransaction.id
     );
-
     if (index === -1) return;
-
     this.deleteIndex = index;
     this.showDeletePopup = true;
     this.App.blurActive = true;
