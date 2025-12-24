@@ -725,11 +725,6 @@ export class Budget implements OnInit {
   }
 
   submitTransaction() {
-    const transactionDate =
-      this.form.date && this.form.date.trim() !== ''
-        ? this.form.date
-        : new Date().toISOString().split('T')[0]; // today
-
     const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
     localStorage.removeItem(resetKey);
     const data = JSON.parse(
@@ -816,7 +811,7 @@ export class Budget implements OnInit {
         type: this.popupType,
         category: this.form.category,
         amount: Number(this.form.amount),
-        date: transactionDate,
+        date: this.form.date,
         description: this.form.description,
         month: this.selectedMonthIndex,
         year: this.selectedYear
