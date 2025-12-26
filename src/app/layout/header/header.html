@@ -1,7 +1,7 @@
 <div class="header">
   <div class="header-left">
     <h2>Smartbudget</h2>
-    <div *ngIf="shouldShow" class="budget-status-box">
+    <div *ngIf="shouldShow && isBudgetPage" class="budget-status-box">
       <h3 *ngIf="amountLeft > 0 && hasEnteredAmount" class="left-budget">
         Amount left to budget: Rs. {{ amountLeft | number:'1.2-2' }}
       </h3>
@@ -16,7 +16,7 @@
     </div>
   </div>
 
-  <div class="month-switch">
+  <div class="month-switch" *ngIf="isBudgetPage">
     <span class="arrow" (click)="goToPreviousMonth()">&#10094;</span>
 
     <div class="month-text" (click)="toggleMonthPopover()">

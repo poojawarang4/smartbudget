@@ -28,7 +28,16 @@
   background: #d0f7d9;
   border: none;
   border-radius: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+}
 
+.over-btn {
+  margin-top: 15px;
+  padding: 8px 8px;
+  background: #d0f7d9;
+  border: none;
+  border-radius: 10px;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -56,6 +65,14 @@
     height: 30px;
   }
 
+  .over-btn {
+    margin-top: 18px;
+    padding: 6px;
+    font-size: 0;
+    width: 30px;
+    height: 30px;
+  }
+
 }
 
 /* ------------------------------------- */
@@ -67,4 +84,23 @@
     font-size: 9px;
     padding: 5px 8px;
   }
+
+  .over-btn {
+    font-size: 9px;
+    padding: 5px 8px;
+  }
+}
+
+.menu-btn.active {
+  background: #4CAF6E;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.over-btn.active {
+  background: #4CAF6E;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }

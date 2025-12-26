@@ -1,4 +1,11 @@
 <div class="sidebar">
   <div class="circle">C</div>
-  <button class="menu-btn">Budget</button>
+
+  <button class="menu-btn" routerLink="/budget" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    Budget
+  </button>
+
+  <button class="over-btn" routerLink="/overview" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    Overview
+  </button>
 </div>
