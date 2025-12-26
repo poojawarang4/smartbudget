@@ -588,22 +588,22 @@ h1 {
 
 .popup-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 10000;
+  justify-content: center;
+  z-index: 1000;
 }
 
 .popup {
-  background: white;
-  width: 450px;
+  background: #fff;
+  border-radius: 16px;
+  width: 420px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 20px;
-  border-radius: 14px;
 }
 
 .popup-header {
@@ -1142,7 +1142,6 @@ h1 {
 }
 
 @media (max-width: 768px) {
-
   /* Tabs should show ONE column only */
   .tab-pane .content,
   .tab-pane .two-column-layout {
@@ -1167,10 +1166,29 @@ h1 {
 }
 
 @media (max-width: 768px) {
+  .popup-backdrop {
+    align-items: flex-end;
+    /* ⬇ bottom */
+  }
+
   .popup {
-    width: 92%;
-    padding: 20px;
-    border-radius: 14px;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    padding: 16px;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
 }
 
@@ -1202,7 +1220,6 @@ h1 {
 }
 
 @media (max-width: 768px) {
-
   .transactions-box,
   .summary-box {
     height: auto;
@@ -1248,7 +1265,6 @@ h1 {
 }
 
 @media (max-width: 480px) {
-
   .grid-header,
   .grid-row {
     grid-template-columns: 1fr 70px 70px;
@@ -1257,7 +1273,6 @@ h1 {
 }
 
 @media (max-width: 768px) {
-
   .grid-header,
   .grid-row {
     grid-template-columns: 1fr 90px 90px;
