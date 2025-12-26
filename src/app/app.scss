@@ -1,12 +1,12 @@
 .layout {
   display: flex;
   height: 100vh;
-  overflow: hidden;       /* Page should NOT scroll */
+  overflow: hidden;
+  /* Page should NOT scroll */
 }
 
 app-sidebar {
   width: 80px;
-  min-width: 80px;
 }
 
 .right-area {
@@ -26,9 +26,11 @@ app-header {
 .center-scroll {
   flex: 1;
   overflow-y: auto;
-  padding-right: 6px;     /* avoid cut content */
+  padding-right: 6px;
+  /* avoid cut content */
 }
+
 .blurred {
   filter: blur(4px);
-  pointer-events: none; 
+  pointer-events: none;
 }
