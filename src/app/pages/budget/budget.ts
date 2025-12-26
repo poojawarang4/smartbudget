@@ -222,24 +222,6 @@ export class Budget implements OnInit {
   };
   activeTab: 'summary' | 'transactions' | 'Categorised' = 'summary';
 
-  public categoryTrendData: ChartData<'line'> = {
-    labels: [],
-    datasets: []
-  };
-
-  public categoryTrendOptions: ChartOptions<'line'> = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'bottom' }
-    },
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  };
-
-
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
   constructor(private monthService: MonthService, private dialog: MatDialog, private budgetShared: BudgetSharedService,
@@ -256,7 +238,6 @@ export class Budget implements OnInit {
       this.loadTransactions();
       this.loadSummary();
       this.hasAnyBudget = this.checkIfAnyBudgetExists();
-      this.categoryTrendData = this.buildCategoryWiseMonthlyData();
     });
 
     this.allCategories = [
@@ -1144,52 +1125,4 @@ export class Budget implements OnInit {
     this.App.blurActive = false;
   }
 
-  getMonthsTillCurrent(year: number, monthIndex: number) {
-    const months = [];
-    for (let m = 0; m <= monthIndex; m++) {
-      months.push({
-        year,
-        month: m,
-        label: `${this.getMonthName(m).slice(0, 3)}`
-      });
-    }
-    return months;
-  }
-
-  buildCategoryWiseMonthlyData() {
-    const data = JSON.parse(
-      localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
-    );
-    const months = this.getMonthsTillCurrent(
-      this.selectedYear,
-      this.selectedMonthIndex
-    );
-    // Main categories
-    const categories = this.expenseCategories.map(c => c.name);
-    // Init structure
-    const categoryMap: any = {};
-    categories.forEach(cat => {
-      categoryMap[cat] = months.map(() => 0);
-    });
-    // Aggregate transactions
-    data.transactions.forEach((t: Transaction) => {
-      if (
-        t.type !== 'expense' ||
-        t.year !== this.selectedYear ||
-        t.month > this.selectedMonthIndex
-      ) return;
-      const main = this.getMainCategory(t.category);
-      if (!categoryMap[main]) return;
-      categoryMap[main][t.month] += t.amount;
-    });
-    return {
-      labels: months.map(m => m.label),
-      datasets: categories.map((cat, index) => ({
-        label: cat,
-        data: categoryMap[cat],
-        borderWidth: 2,
-        fill: false
-      }))
-    };
-  }
 }

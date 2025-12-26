@@ -1,0 +1,12 @@
+
+<div class="tab-pane">
+    <h3 class="section-title">Category-wise Monthly Expense Trends</h3>
+  <div class="chart-wrapper">
+    <canvas
+      baseChart
+      [data]="categoryTrendData"
+      [type]="'line'"
+      [options]="categoryTrendOptions">
+    </canvas>
+  </div>
+</div>

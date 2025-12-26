@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MonthService } from '../../../month.service';
 import { BudgetSharedService } from '../budget-shared.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -44,7 +45,7 @@ export class Header implements OnInit {
   shouldShow: boolean = false;
   totalIncome: any;
 
-  constructor(private monthService: MonthService, private budgetShared: BudgetSharedService) { }
+  constructor(private monthService: MonthService, private budgetShared: BudgetSharedService, private router: Router) { }
 
   ngOnInit() {
     this.updateVisibleMonths();
@@ -159,4 +160,9 @@ export class Header implements OnInit {
     }
     this.updateVisibleMonths();
   }
+
+ get isBudgetPage(): boolean {
+  return this.router.url.includes('/budget');
+}
+
 }
