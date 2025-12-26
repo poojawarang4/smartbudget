@@ -220,7 +220,25 @@ export class Budget implements OnInit {
     labels: [],
     datasets: [{ data: [] }]
   };
-  activeTab: 'summary' | 'transactions' = 'summary';
+  activeTab: 'summary' | 'transactions' | 'Categorised' = 'summary';
+
+  public categoryTrendData: ChartData<'line'> = {
+    labels: [],
+    datasets: []
+  };
+
+  public categoryTrendOptions: ChartOptions<'line'> = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom' }
+    },
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  };
+
 
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
@@ -238,6 +256,7 @@ export class Budget implements OnInit {
       this.loadTransactions();
       this.loadSummary();
       this.hasAnyBudget = this.checkIfAnyBudgetExists();
+      this.categoryTrendData = this.buildCategoryWiseMonthlyData();
     });
 
     this.allCategories = [
@@ -639,54 +658,54 @@ export class Budget implements OnInit {
         legend: {
           display: false,
         },
- tooltip: {
-  callbacks: {
-    label: (context: any) => {
-      const categoryName = context.label;
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const categoryName = context.label;
 
-      // Skip Remaining
-      if (categoryName === 'Remaining') {
-        return `Remaining – ${context.raw}%`;
-      }
+              // Skip Remaining
+              if (categoryName === 'Remaining') {
+                return `Remaining – ${context.raw}%`;
+              }
 
-      const index = context.dataIndex;
-      const category = categories.find(c => c.name === categoryName);
-      const items = category?.data || [];
-      const totalCategoryAmount = values[index];
-      const categoryPercent = context.raw;
+              const index = context.dataIndex;
+              const category = categories.find(c => c.name === categoryName);
+              const items = category?.data || [];
+              const totalCategoryAmount = values[index];
+              const categoryPercent = context.raw;
 
-      const formatter = new Intl.NumberFormat('en-IN', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+              const formatter = new Intl.NumberFormat('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
 
-      // 🔹 Tooltip lines (each item = new line)
-      const lines: string[] = [];
+              // 🔹 Tooltip lines (each item = new line)
+              const lines: string[] = [];
 
-      // Main category line
-      lines.push(
-        `${categoryName} — ₹${formatter.format(totalCategoryAmount)} (${categoryPercent}%)`
-      );
+              // Main category line
+              lines.push(
+                `${categoryName} — ₹${formatter.format(totalCategoryAmount)} (${categoryPercent}%)`
+              );
 
-      // Sub-category lines
-      items.forEach(item => {
-        const amt = Number(item.planned || 0);
-        if (amt === 0) return;
+              // Sub-category lines
+              items.forEach(item => {
+                const amt = Number(item.planned || 0);
+                if (amt === 0) return;
 
-        const percentInsideCategory =
-          totalCategoryAmount > 0
-            ? ((amt / totalCategoryAmount) * 100).toFixed(1)
-            : '0';
+                const percentInsideCategory =
+                  totalCategoryAmount > 0
+                    ? ((amt / totalCategoryAmount) * 100).toFixed(1)
+                    : '0';
 
-        lines.push(
-          `• ${item.name}: ₹${formatter.format(amt)} (${percentInsideCategory}%)`
-        );
-      });
+                lines.push(
+                  `• ${item.name}: ₹${formatter.format(amt)} (${percentInsideCategory}%)`
+                );
+              });
 
-      return lines; // ✅ THIS IS THE KEY FIX
-    }
-  }
-}
+              return lines; // ✅ THIS IS THE KEY FIX
+            }
+          }
+        }
 
       }
     };
@@ -1125,4 +1144,52 @@ export class Budget implements OnInit {
     this.App.blurActive = false;
   }
 
+  getMonthsTillCurrent(year: number, monthIndex: number) {
+    const months = [];
+    for (let m = 0; m <= monthIndex; m++) {
+      months.push({
+        year,
+        month: m,
+        label: `${this.getMonthName(m).slice(0, 3)}`
+      });
+    }
+    return months;
+  }
+
+  buildCategoryWiseMonthlyData() {
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
+    );
+    const months = this.getMonthsTillCurrent(
+      this.selectedYear,
+      this.selectedMonthIndex
+    );
+    // Main categories
+    const categories = this.expenseCategories.map(c => c.name);
+    // Init structure
+    const categoryMap: any = {};
+    categories.forEach(cat => {
+      categoryMap[cat] = months.map(() => 0);
+    });
+    // Aggregate transactions
+    data.transactions.forEach((t: Transaction) => {
+      if (
+        t.type !== 'expense' ||
+        t.year !== this.selectedYear ||
+        t.month > this.selectedMonthIndex
+      ) return;
+      const main = this.getMainCategory(t.category);
+      if (!categoryMap[main]) return;
+      categoryMap[main][t.month] += t.amount;
+    });
+    return {
+      labels: months.map(m => m.label),
+      datasets: categories.map((cat, index) => ({
+        label: cat,
+        data: categoryMap[cat],
+        borderWidth: 2,
+        fill: false
+      }))
+    };
+  }
 }

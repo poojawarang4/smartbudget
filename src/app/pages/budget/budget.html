@@ -363,6 +363,8 @@
             <button [class.active]="activeTab === 'summary'" (click)="activeTab = 'summary'">Budget Summary</button>
             <button [class.active]="activeTab === 'transactions'"
               (click)="activeTab = 'transactions'">Transactions</button>
+            <!-- <button [class.active]="activeTab === 'Categorised'"
+              (click)="activeTab = 'Categorised'">Categorised</button> -->
           </div>
           <div>
             <div *ngIf="activeTab === 'summary'" class="tab-pane">
@@ -519,6 +521,10 @@
                 {{ leftMessage }}
               </div>
             </div>
+            <!-- <div *ngIf="activeTab === 'Categorised'" class="tab-pane">
+              <canvas baseChart [data]="categoryTrendData" [type]="'line'" [options]="categoryTrendOptions">
+              </canvas>
+            </div> -->
             <div class="success-popup" *ngIf="successPopup">
               {{ successMessage }}
             </div>
