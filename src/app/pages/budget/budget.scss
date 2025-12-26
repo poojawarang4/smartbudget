@@ -103,43 +103,6 @@
   cursor: pointer;
 }
 
-/* TABLES */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.table tr {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.table tr:last-child {
-  border-bottom: none;
-}
-
-.table td,
-.table th {
-  padding: 12px 0;
-}
-
-/* Category column (left) */
-.table td:first-child,
-.table th:first-child {
-  width: auto;
-  text-align: left;
-}
-
-/* Planned + Received (right aligned) */
-.table td:nth-child(2),
-.table th:nth-child(2),
-.table td:nth-child(3),
-.table th:nth-child(3) {
-  width: 120px;
-  text-align: right;
-  padding-right: 8px;
-}
-
 .accordion-header {
   display: flex;
   justify-content: space-between;
@@ -197,48 +160,13 @@
   transition: max-height 0.35s ease;
 }
 
-.row-head,
-.row-item {
-  display: grid;
-  grid-template-columns: 1fr 120px 120px;
-  padding: 12px 0;
-}
-
-/* BORDER */
-.row-head {
-  padding-top: 0;
-  font-weight: 600;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.row-item {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.row-item:last-child {
-  border-bottom: none;
-}
-
 .accordion-item.open .accordion-body {
   max-height: 500px;
 }
 
-.amount {
-  text-align: right;
-  padding-right: 18px;
-  white-space: nowrap;
-}
 .disabled {
   pointer-events: none;
   opacity: 0.5;
-}
-
-.row-head span:nth-child(2),
-.row-head span:nth-child(3),
-.row-item span:nth-child(2),
-.row-item span:nth-child(3) {
-  text-align: right;
-  padding-right: 15px;
 }
 
 /* Make whole page non-scrollable */
@@ -326,12 +254,6 @@ html {
   border-radius: 4px;
 }
 
-.amount {
-  cursor: pointer;
-  display: inline-block;
-  min-width: 70px;
-}
-
 /* --------------------------------------------- */
 /*  RESPONSIVE LAYOUT FOR BUDGET PAGE            */
 /* --------------------------------------------- */
@@ -351,39 +273,23 @@ html {
 /* 📌 Mobile – Collapse into single column */
 @media (max-width: 768px) {
   .layout {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     padding: 10px;
-    gap: 10px;
   }
 
   /* Right summary shifts to bottom */
   .summary-fixed {
     position: relative;
-    top: 0;
-    width: 100%;
   }
 
   .card {
     padding: 15px;
   }
 
-  .table td,
-  .table th {
-    padding: 8px 0;
-    font-size: 14px;
-  }
-
-  .row-head,
-  .row-item {
-    grid-template-columns: 1fr 90px 90px;
-  }
-
   .edit-inline {
     width: 60px;
-  }
-
-  .amount {
-    min-width: 60px;
   }
 }
 
@@ -396,18 +302,6 @@ html {
   /* Reduce spacing */
   .card {
     padding: 12px;
-  }
-
-  /* Stack rows if space is too tight */
-  .row-head,
-  .row-item {
-    grid-template-columns: 1fr 70px 70px;
-    font-size: 13px;
-  }
-
-  .table td,
-  .table th {
-    font-size: 13px;
   }
 
   .chart {
@@ -424,27 +318,8 @@ html {
     font-size: 13px;
   }
 
-  .amount {
-    font-size: 13px;
-    min-width: 55px;
-  }
-
   .accordion-header h5 {
     font-size: 15px;
-  }
-}
-
-/* 📌 Ultra-small devices */
-@media (max-width: 360px) {
-
-  .row-head,
-  .row-item {
-    grid-template-columns: 1fr 60px 60px;
-  }
-
-  .amount,
-  .edit-inline {
-    min-width: 50px;
   }
 }
 
@@ -1243,15 +1118,148 @@ h1 {
   justify-self: start;
 }
 
-.amount-tile .mat-grid-tile-content {
-  width: 100%;
-  display: flex;
-  align-items: center;
+@media (max-width: 768px) {
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .tabs button {
+    font-size: 14px;
+    padding: 12px 8px;
+  }
 }
 
-.amount-text {
-  margin-left: auto;
-  padding-right: 16px;
+@media (max-width: 768px) {
+  .fab {
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Tabs should show ONE column only */
+  .tab-pane .content,
+  .tab-pane .two-column-layout {
+    display: block !important;
+  }
+
+  /* Hide right section unless Summary tab is active */
+  .tab-pane.transactions-tab .right-section {
+    display: none;
+  }
+
+  .tab-pane.summary-tab .left-section {
+    display: none;
+  }
+
+  /* Remove sticky behavior inside tabs */
+  .right-section,
+  .summary-fixed {
+    position: relative !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .popup {
+    width: 92%;
+    padding: 20px;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .transaction-grid {
+    height: auto;
+  }
+
+  .amount-text {
+    font-size: 14px;
+  }
+
+  .left-tile {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pie-chart-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .transactions-box,
+  .summary-box {
+    height: auto;
+    max-height: none;
+  }
+
+  .transactions-scroll,
+  .summary-scroll {
+    overflow-y: visible;
+  }
+}
+
+.grid-table {
+  width: 100%;
+}
+
+.grid-header,
+.grid-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.grid-header {
   font-weight: 600;
-  white-space: nowrap;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.grid-row {
+  border-bottom: 1px solid #eee;
+}
+
+.grid-row:last-child {
+  border-bottom: none;
+}
+
+.grid-header span:nth-child(2),
+.grid-header span:nth-child(3),
+.grid-row span:nth-child(2),
+.grid-row span:nth-child(3) {
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+
+  .grid-header,
+  .grid-row {
+    grid-template-columns: 1fr 70px 70px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .grid-header,
+  .grid-row {
+    grid-template-columns: 1fr 90px 90px;
+  }
 }
