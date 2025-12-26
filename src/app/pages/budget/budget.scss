@@ -1278,3 +1278,13 @@ h1 {
     grid-template-columns: 1fr 90px 90px;
   }
 }
+
+@media (max-width: 768px) {
+  .popup .row {
+    flex-direction: column;
+  }
+
+  .popup .row .half {
+    width: 100%;
+  }
+}
