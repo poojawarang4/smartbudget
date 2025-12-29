@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, LOCALE_ID, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { MonthService } from '../../../month.service';
 import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
@@ -12,8 +12,19 @@ import { BudgetSharedService } from '../../layout/budget-shared.service';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { App } from '../../app';
 import { AutoFocusDirective } from '../../auto-focus-directive';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 
 registerLocaleData(localeIn);
+
+interface BudgetItem {
+  name: string;
+  planned: number;
+  received: number;
+  editPlanned: boolean;
+  editReceived: boolean;
+  showSuggest?: boolean; // ✅ THIS IS THE KEY
+}
 
 interface Transaction {
   id: string;
@@ -45,6 +56,10 @@ interface SummaryItem {
 
 })
 export class Budget implements OnInit {
+  hoverInside = false;
+  private overlayRef: OverlayRef | null = null;
+  @ViewChild('reallocateTpl') reallocateTpl!: TemplateRef<any>;
+  private suppressReceivedRecalc = false;
   showDeletePopup = false;
   deleteIndex: number | null = null;
   showPopup = false;
@@ -160,54 +175,54 @@ export class Budget implements OnInit {
   hasAnyBudget = false;
 
   income = [
-    { name: 'Salary 1', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Salary 2', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Rental Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Investment Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Other Income', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Salary 1', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Salary 2', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Rental Income', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Investment Income', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Other Income', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
 
   housing = [
-    { name: 'Mortgage', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Rent', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Water', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Mortgage', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Rent', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Water', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
 
   tranportation = [
-    { name: 'Fuel', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Insurance', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Maintenance', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Fuel', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Insurance', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Maintenance', planned: 0, received: 0, editPlanned: false, editReceived: false },
   ];
   food = [
-    { name: 'Groceries', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Restaurants', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Groceries', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Restaurants', planned: 0, received: 0, editPlanned: false, editReceived: false },
   ];
   insurance = [
-    { name: 'Health', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
-    { name: 'Life', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false },
+    { name: 'Health', planned: 0, received: 0, editPlanned: false, editReceived: false },
+    { name: 'Life', planned: 0, received: 0, editPlanned: false, editReceived: false },
   ];
-  savings = [
-    { name: 'Savings', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+  savings: BudgetItem[] = [
+    { name: 'Savings', planned: 0, received: 0, editPlanned: false, editReceived: false, showSuggest: false }
   ];
 
   giving = [
-    { name: 'Giving', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Giving', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
 
   personal = [
-    { name: 'Personal', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Personal', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
 
   loan = [
-    { name: 'Loan Repayment', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Loan Repayment', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
 
   entertainment = [
-    { name: 'Entertainment', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Entertainment', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
 
   childcare = [
-    { name: 'Child Care', planned: '0.00', received: '0.00', editPlanned: false, editReceived: false }
+    { name: 'Child Care', planned: 0, received: 0, editPlanned: false, editReceived: false }
   ];
   public pieChartOptions: any = {
     plugins: {
@@ -225,7 +240,8 @@ export class Budget implements OnInit {
   public pieChartType: ChartType = 'pie';
   public pieChartColors = [{ backgroundColor: ['#4caf50', '#9c27b0', '#ff9800', '#ffeb3b', '#ff9800', '#e91e63', '#f44336', '#8e24aa', '#3f51b5', '#2196f3', '#8bc34a'] }];
   constructor(private monthService: MonthService, private dialog: MatDialog, private budgetShared: BudgetSharedService,
-    private App: App
+    private App: App, private overlay: Overlay,
+    private vcr: ViewContainerRef
   ) { }
 
   ngOnInit() {
@@ -323,13 +339,9 @@ export class Budget implements OnInit {
       this.budgetStatus = "Amount over budget";
     }
   }
+
   hasPlannedIncome(): boolean {
-    return this.income.some(inc =>
-      inc.planned !== null &&
-      inc.planned !== undefined &&
-      inc.planned !== '' &&
-      Number(inc.planned) > 0
-    );
+    return this.income.some(inc => Number(inc.planned) > 0);
   }
 
   editAmount(item: any, field: 'planned' | 'received', isIncome: boolean) {
@@ -429,6 +441,17 @@ export class Budget implements OnInit {
       this.resetToZeroValues();
       this.budgetExistsForMonth = forceCreate ? true : false;
     }
+    this.normalizeItems(this.income);
+    this.normalizeItems(this.savings);
+    this.normalizeItems(this.giving);
+    this.normalizeItems(this.housing);
+    this.normalizeItems(this.tranportation);
+    this.normalizeItems(this.food);
+    this.normalizeItems(this.personal);
+    this.normalizeItems(this.insurance);
+    this.normalizeItems(this.loan);
+    this.normalizeItems(this.entertainment);
+    this.normalizeItems(this.childcare);
     this.rebuildAllCategories();
     this.loadTransactions();
     this.loadSummary();
@@ -456,10 +479,11 @@ export class Budget implements OnInit {
     const resetArray = (arr: any[]) =>
       arr.map(item => ({
         ...item,
-        planned: '0.00',
-        received: '0.00',
+        planned: 0,
+        received: 0,
         editPlanned: false,
-        editReceived: false
+        editReceived: false,
+        showSuggest: false
       }));
     this.income = resetArray(this.income);
     this.savings = resetArray(this.savings);
@@ -541,8 +565,8 @@ export class Budget implements OnInit {
     ];
     allGroups.forEach(group => {
       group.forEach(item => {
-        item.planned = '0.00';
-        item.received = '0.00';
+        item.planned = 0;
+        item.received = 0;
       });
     });
     // ✅ Save reset flag for this month
@@ -741,9 +765,9 @@ export class Budget implements OnInit {
       if (old.type === 'income') {
         const row = this.income.find(i => i.name === old.category);
         if (row) {
-          row.received = (
+          row.received =
             Number(row.received || 0) - Number(old.amount)
-          ).toFixed(2);
+
         }
       }
       if (old.type === 'expense') {
@@ -773,9 +797,9 @@ export class Budget implements OnInit {
       if (updated.type === 'income') {
         const row = this.income.find(i => i.name === updated.category);
         if (row) {
-          row.received = (
+          row.received =
             Number(row.received || 0) + updated.amount
-          ).toFixed(2);
+
         }
       }
       if (updated.type === 'expense') {
@@ -958,7 +982,7 @@ export class Budget implements OnInit {
 
   updateIncomeReceivedFromTransactions() {
     // reset income received
-    this.income.forEach(i => (i.received = '0.00'));
+    this.income.forEach(i => (i.received = 0));
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
     );
@@ -971,39 +995,65 @@ export class Budget implements OnInit {
     monthIncome.forEach(t => {
       const row = this.income.find(i => i.name === t.category);
       if (row) {
-        row.received = (
+        row.received =
           Number(row.received || 0) + t.amount
-        ).toFixed(2);
+
       }
     });
   }
 
   updateExpenseReceivedFromTransactions() {
-    const resetKey = `budget-reset-${this.selectedYear}-${this.selectedMonthIndex}`;
-    // ❌ If budget was reset, do NOT recalc received
-    if (localStorage.getItem(resetKey) === 'true') {
-      return;
-    }
-    this.allCategories.forEach(group => {
-      group.forEach(item => (item.received = '0.00'));
-    });
+    // reset all expense received first
+    const all = [
+      this.savings,
+      this.giving,
+      this.housing,
+      this.tranportation,
+      this.food,
+      this.personal,
+      this.insurance,
+      this.loan,
+      this.entertainment,
+      this.childcare
+    ];
+
+    all.forEach(group =>
+      group.forEach(item => item.received = 0)
+    );
+
     const data = JSON.parse(
       localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
     );
-    const monthExpenses: Transaction[] = data.transactions.filter(
+
+    const expenses = data.transactions.filter(
       (t: Transaction) =>
         t.type === 'expense' &&
         t.month === this.selectedMonthIndex &&
         t.year === this.selectedYear
     );
-    monthExpenses.forEach(t => {
-      // Find the exact category/subcategory in budget arrays
-      for (let group of this.allCategories) {
-        const item = group.find(i => i.name === t.category); // match exact subcategory
-        if (item) {
-          item.received = (Number(item.received || 0) + t.amount).toFixed(2);
-          break; // stop after first match
-        }
+
+    expenses.forEach((t: Transaction) => {
+      const main = this.getMainCategory(t.category);
+
+      const groupMap: any = {
+        Savings: this.savings,
+        Giving: this.giving,
+        Housing: this.housing,
+        Transportation: this.tranportation,
+        Food: this.food,
+        Personal: this.personal,
+        Insurance: this.insurance,
+        'Loan Repayment': this.loan,
+        Entertainment: this.entertainment,
+        'Child Care': this.childcare
+      };
+
+      const group = groupMap[main];
+      if (!group) return;
+
+      const row = group.find((i: any) => i.name === t.category);
+      if (row) {
+        row.received += t.amount; // ✅ always number
       }
     });
   }
@@ -1030,20 +1080,20 @@ export class Budget implements OnInit {
     return 'green';;
   }
 
-  getReceivedClass(item: { planned: string; received: string }): string {
+  getReceivedClass(item: { planned: number; received: number }): string {
     const planned = Number(item.planned) || 0;
     const received =
-      item.received === '' || item.received == null
+      item.received === 0 || item.received == null
         ? 0
         : Number(item.received);
     return received > planned ? 'exceed' : '';
   }
 
-  getReceivedDisplay(item: { planned: string; received: string }): string {
+  getReceivedDisplay(item: { planned: number; received: number }): string {
     const planned = Number(item.planned) || 0;
     // ✅ Handle empty / undefined received
     const received =
-      item.received === '' || item.received == null
+      item.received === 0 || item.received == null
         ? 0
         : Number(item.received);
     if (received > planned) {
@@ -1125,4 +1175,147 @@ export class Budget implements OnInit {
     this.App.blurActive = false;
   }
 
+  getMonthsTillCurrent(year: number, monthIndex: number) {
+    const months = [];
+    for (let m = 0; m <= monthIndex; m++) {
+      months.push({
+        year,
+        month: m,
+        label: `${this.getMonthName(m).slice(0, 3)}`
+      });
+    }
+    return months;
+  }
+
+  buildCategoryWiseMonthlyData() {
+    const data = JSON.parse(
+      localStorage.getItem('smartbudget-data') || '{"transactions":[]}'
+    );
+    const months = this.getMonthsTillCurrent(
+      this.selectedYear,
+      this.selectedMonthIndex
+    );
+    // Main categories
+    const categories = this.expenseCategories.map(c => c.name);
+    // Init structure
+    const categoryMap: any = {};
+    categories.forEach(cat => {
+      categoryMap[cat] = months.map(() => 0);
+    });
+    // Aggregate transactions
+    data.transactions.forEach((t: Transaction) => {
+      if (
+        t.type !== 'expense' ||
+        t.year !== this.selectedYear ||
+        t.month > this.selectedMonthIndex
+      ) return;
+      const main = this.getMainCategory(t.category);
+      if (!categoryMap[main]) return;
+      categoryMap[main][t.month] += t.amount;
+    });
+    return {
+      labels: months.map(m => m.label),
+      datasets: categories.map((cat, index) => ({
+        label: cat,
+        data: categoryMap[cat],
+        borderWidth: 2,
+        fill: false
+      }))
+    };
+  }
+  getOverBudgetAmount(item: any): number {
+    return Math.max(Number(item.received) - Number(item.planned), 0);
+  }
+  getReallocationSuggestions(overItem: any) {
+    const overAmount = this.getOverBudgetAmount(overItem);
+    if (overAmount <= 0) return [];
+
+    const suggestions: any[] = [];
+
+    this.allCategories.forEach(group => {
+      group.forEach(item => {
+        if (item === overItem) return;
+
+        const planned = Number(item.planned);
+        const received = Number(item.received);
+        const surplus = planned - received;
+
+        if (surplus > 0) {
+          suggestions.push({
+            item,
+            available: surplus,
+            canCover: Math.min(surplus, overAmount)
+          });
+        }
+      });
+    });
+
+    // Sort biggest surplus first
+    return suggestions.sort((a, b) => b.available - a.available);
+  }
+
+  reallocate(overItem: any, fromItem: any, amount: number) {
+    this.suppressReceivedRecalc = true;
+
+    fromItem.planned = Number(fromItem.planned) - amount;
+    overItem.planned = Number(overItem.planned) + amount;
+
+    overItem.showSuggest = false;
+
+    this.calculateTotals();
+    this.calculateSummaryPieChart();
+    this.saveBudget();
+
+    this.suppressReceivedRecalc = false;
+
+    this.showSuccess(
+      `₹${amount.toFixed(2)} moved from ${fromItem.name} to ${overItem.name}`
+    );
+  }
+
+  normalizeItems(arr: any[]) {
+    arr.forEach(item => {
+      if (item.showSuggest === undefined) {
+        item.showSuggest = false;
+      }
+    });
+  }
+  showReallocateTooltip(origin: HTMLElement, item: any) {
+    this.hoverInside = true;
+
+    if (this.overlayRef) return;
+
+    const positionStrategy = this.overlay.position()
+      .flexibleConnectedTo(origin)
+      .withPositions([
+        {
+          originX: 'start',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top'
+        }
+      ]);
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      scrollStrategy: this.overlay.scrollStrategies.reposition()
+    });
+
+    this.overlayRef.attach(
+      new TemplatePortal(this.reallocateTpl, this.vcr, { $implicit: item })
+    );
+  }
+
+  hideTooltipDelayed() {
+    setTimeout(() => {
+      if (!this.hoverInside) {
+        this.hideTooltip();
+      }
+    }, 120);
+  }
+
+  hideTooltip() {
+    this.overlayRef?.dispose();
+    this.overlayRef = null;
+  }
 }

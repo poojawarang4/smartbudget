@@ -60,7 +60,9 @@
               <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
 
-              <span class="amount" *ngIf="!item.editReceived" [ngClass]="getReceivedClass(item)">
+              <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                (mouseenter)="showReallocateTooltip(origin, item)"
+                (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                 {{ getReceivedDisplay(item) }}
               </span>
             </div>
@@ -86,7 +88,9 @@
               <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
 
-              <span class="amount" *ngIf="!item.editReceived" [ngClass]="getReceivedClass(item)">
+              <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                (mouseenter)="showReallocateTooltip(origin, item)"
+                (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                 {{ getReceivedDisplay(item) }}
               </span>
             </div>
@@ -123,10 +127,12 @@
                 </ng-container>
 
                 <!-- Received -->
-                <span class="amount" [ngClass]="getReceivedClass(item)">
+                <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                  (mouseenter)="showReallocateTooltip(origin, item)"
+                  (mouseleave)="hoverInside = false; hideTooltipDelayed()">
+
                   {{ getReceivedDisplay(item) }}
                 </span>
-
               </div>
             </div>
           </div>
@@ -162,10 +168,11 @@
                 </ng-container>
 
                 <!-- Received -->
-                <span class="amount" [ngClass]="getReceivedClass(item)">
+                <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                  (mouseenter)="showReallocateTooltip(origin, item)"
+                  (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                   {{ getReceivedDisplay(item) }}
                 </span>
-
               </div>
             </div>
           </div>
@@ -200,11 +207,11 @@
                     (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item,'planned')" />
                 </ng-container>
 
-                <!-- Received -->
-                <span class="amount" [ngClass]="getReceivedClass(item)">
+                <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                  (mouseenter)="showReallocateTooltip(origin, item)"
+                  (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                   {{ getReceivedDisplay(item) }}
                 </span>
-
               </div>
             </div>
           </div>
@@ -228,8 +235,9 @@
 
               <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
-
-              <span class="amount" *ngIf="!item.editReceived" [ngClass]="getReceivedClass(item)">
+              <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                (mouseenter)="showReallocateTooltip(origin, item)"
+                (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                 {{ getReceivedDisplay(item) }}
               </span>
             </div>
@@ -267,10 +275,11 @@
                 </ng-container>
 
                 <!-- Received -->
-                <span class="amount" [ngClass]="getReceivedClass(item)">
+                <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                  (mouseenter)="showReallocateTooltip(origin, item)"
+                  (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                   {{ getReceivedDisplay(item) }}
                 </span>
-
               </div>
             </div>
           </div>
@@ -295,7 +304,9 @@
               <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
 
-              <span class="amount" *ngIf="!item.editReceived" [ngClass]="getReceivedClass(item)">
+              <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                (mouseenter)="showReallocateTooltip(origin, item)"
+                (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                 {{ getReceivedDisplay(item) }}
               </span>
             </div>
@@ -321,7 +332,9 @@
               <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
 
-              <span class="amount" *ngIf="!item.editReceived" [ngClass]="getReceivedClass(item)">
+              <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                (mouseenter)="showReallocateTooltip(origin, item)"
+                (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                 {{ getReceivedDisplay(item) }}
               </span>
             </div>
@@ -347,13 +360,28 @@
               <input *ngIf="item.editPlanned" appAutoFocusDirective type="number" [(ngModel)]="item.planned"
                 (blur)="finishEdit(item,'planned')" (keydown.enter)="finishEdit(item, 'planned')" />
 
-              <span class="amount" *ngIf="!item.editReceived" [ngClass]="getReceivedClass(item)">
+              <span class="amount" [ngClass]="getReceivedClass(item)" #origin
+                (mouseenter)="showReallocateTooltip(origin, item)"
+                (mouseleave)="hoverInside = false; hideTooltipDelayed()">
                 {{ getReceivedDisplay(item) }}
               </span>
             </div>
           </div>
         </div>
       </div>
+
+      <ng-template #reallocateTpl let-item>
+        <div class="reallocate-tooltip" (mouseenter)="hoverInside = true"
+          (mouseleave)="hoverInside = false; hideTooltipDelayed()">
+          <p>
+            Over by <strong>₹{{ getOverBudgetAmount(item) | number:'1.2-2' }}</strong>
+          </p>
+          <button *ngFor="let s of getReallocationSuggestions(item).slice(0,3)"
+            (click)="reallocate(item, s.item, s.canCover)">
+            Use ₹{{ s.canCover | number:'1.2-2' }} from {{ s.item.name }}
+          </button>
+        </div>
+      </ng-template>
 
       <!-- RIGHT SIDE (FIXED BUDGET SUMMARY) -->
       <div class="right-section card">
