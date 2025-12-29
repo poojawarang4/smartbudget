@@ -28,11 +28,13 @@ app-header {
   margin-left: 80px;
   /* same as sidebar width */
   transition: margin-left 0.3s ease;
+  overflow-y: auto;
 }
 
 /* MOBILE: no offset */
 @media (max-width: 768px) {
   .app-content {
     margin-left: 0;
+    overflow-y: auto;
   }
 }
