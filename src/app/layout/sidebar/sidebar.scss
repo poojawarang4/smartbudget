@@ -6,7 +6,11 @@
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
-  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1001;
+  transition: transform 0.3s ease;
 }
 
 .circle {
@@ -48,7 +52,12 @@
 @media (max-width: 768px) {
 
   .sidebar {
-    width: 44px;
+    width: 70px;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
   }
 
   .circle {
@@ -61,7 +70,7 @@
     margin-top: 18px;
     padding: 6px;
     font-size: 0;
-    width: 30px;
+    width: 50px;
     height: 30px;
   }
 
@@ -69,7 +78,7 @@
     margin-top: 18px;
     padding: 6px;
     font-size: 0;
-    width: 30px;
+    width: 50px;
     height: 30px;
   }
 
@@ -82,7 +91,6 @@
 
   .menu-btn {
     font-size: 9px;
-    padding: 5px 8px;
   }
 
   .over-btn {
@@ -103,4 +111,32 @@
   color: white;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1100;
+  font-size: 22px;
+  background: #4CAF6E;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
 }

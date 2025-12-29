@@ -1,11 +1,11 @@
-<div class="layout" >
+<div class="layout">
   <app-sidebar [class.blurred]="blurActive"></app-sidebar>
 
   <div class="right-area">
     <app-header [class.blurred]="blurActive"></app-header>
 
     <!-- Only center scrolls -->
-    <div class="center-scroll">
+    <div class="app-content">
       <router-outlet></router-outlet>
     </div>
   </div>

@@ -1,11 +1,23 @@
-<div class="sidebar">
+<!-- ☰ MOBILE MENU BUTTON -->
+<button class="mobile-menu-toggle" (click)="toggleSidebar()">
+  ☰
+</button>
+
+<!-- OVERLAY -->
+<div class="sidebar-overlay" *ngIf="isOpen" (click)="closeSidebar()">
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" [class.open]="isOpen">
   <div class="circle">C</div>
 
-  <button class="menu-btn" routerLink="/budget" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+  <button class="menu-btn" routerLink="/budget" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+    (click)="closeSidebar()">
     Budget
   </button>
 
-  <button class="over-btn" routerLink="/overview" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+  <button class="over-btn" routerLink="/overview" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+    (click)="closeSidebar()">
     Overview
   </button>
 </div>
