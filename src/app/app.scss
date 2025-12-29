@@ -18,15 +18,23 @@ app-header {
   z-index: 100;
 }
 
-/* ONLY THIS SCROLLS */
-.center-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 6px;
-  /* avoid cut content */
-}
-
 .blurred {
   filter: blur(4px);
   pointer-events: none;
+}
+
+/* MAIN CONTENT */
+.app-content {
+  margin-left: 80px;
+  /* same as sidebar width */
+  transition: margin-left 0.3s ease;
+  overflow-y: auto;
+}
+
+/* MOBILE: no offset */
+@media (max-width: 768px) {
+  .app-content {
+    margin-left: 0;
+    overflow-y: auto;
+  }
 }
