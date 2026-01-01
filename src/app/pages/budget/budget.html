@@ -369,11 +369,16 @@
               <h3>Budget Summary</h3>
               <div class="pie-chart-wrapper">
                 <canvas baseChart [data]="pieChartData" [labels]="pieChartLabels" [options]="pieChartOptions"
-                  [type]="'doughnut'">
-                </canvas>
+                  [type]="'doughnut'"> </canvas>
+                <div class="selected-info" *ngIf="selectedCategory">
+                  <h2>
+                    ₹ {{ selectedCategory.amount}}
+                  </h2>
+                </div>
               </div>
               <div class="category-list" *ngIf="categoryDisplay.length > 0">
-                <div class="category-row" *ngFor="let c of categoryDisplay">
+                <div class="category-row" *ngFor="let c of categoryDisplay;let i = index" (click)="selectCategory(c, i)"
+                  [class.active]="selectedCategory?.name === c.name">
                   <span class="dot" [style.backgroundColor]="c.color"></span>
                   <span class="name">{{ c.name }}</span>
                   <span class="percent">{{ c.percent }}%</span>

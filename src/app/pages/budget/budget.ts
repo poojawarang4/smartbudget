@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, LOCALE_ID, OnInit, ViewChild } from '@angular/core';
 import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { MonthService } from '../../../month.service';
 import { ResetBudgetPopupComponent } from '../reset-budget-popup/reset-budget-popup';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import localeIn from '@angular/common/locales/en-IN';
 import { registerLocaleData } from '@angular/common';
@@ -45,6 +45,12 @@ interface SummaryItem {
 
 })
 export class Budget implements OnInit {
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+  selectedCategory: {
+    name: string;
+    amount: number;
+    index: number;
+  } | null = null;
   showDeletePopup = false;
   deleteIndex: number | null = null;
   showPopup = false;
@@ -608,7 +614,7 @@ export class Budget implements OnInit {
     const totalPercent = percentages.reduce((a, b) => a + b, 0);
     const remainingPercent = +(100 - totalPercent).toFixed(1);
     // INTERNAL CHART DATA
-    const chartData = [...percentages, remainingPercent];
+    const chartData = [...values];
     const chartColors = [
       ...this.chartColors.slice(0, percentages.length),
       "#e0e0e0" // remaining hidden color
@@ -688,6 +694,14 @@ export class Budget implements OnInit {
           }
         }
 
+      },
+      onClick: (event: any, elements: any[]) => {
+        if (!elements.length) return;
+
+        const index = elements[0].index;
+        const category = this.categoryDisplay[index];
+
+        this.selectCategory(category, index);
       }
     };
   }
@@ -904,7 +918,6 @@ export class Budget implements OnInit {
     const summary: Record<string, SummaryItem> = {};
     monthTransactions.forEach((t: Transaction) => {
       const main = this.getMainCategory(t.category);
-
       if (!summary[main]) {
         summary[main] = { allotted: 0, spent: 0, remain: 0 };
       }
@@ -922,7 +935,6 @@ export class Budget implements OnInit {
           }
         });
       });
-
       summary[cat].allotted = allotted;
       summary[cat].remain = allotted - summary[cat].spent;
     });
@@ -1123,6 +1135,31 @@ export class Budget implements OnInit {
     this.showDeletePopup = false;
     this.deleteIndex = null;
     this.App.blurActive = false;
+  }
+
+  selectCategory(category: any, index: number) {
+    const categoryAmount = this.pieChartData.datasets[0].data[index];
+    this.selectedCategory = {
+      name: category.name,
+      amount: Number(categoryAmount),
+      index
+    };
+    this.highlightChartSegment(index);
+  }
+
+  highlightChartSegment(index: number) {
+    if (!this.chart?.chart) return;
+    const chart = this.chart.chart;
+    // Clear previous selection
+    chart.setActiveElements([]);
+    // Activate selected arc
+    chart.setActiveElements([
+      {
+        datasetIndex: 0,
+        index: index
+      }
+    ]);
+    chart.update();
   }
 
 }

@@ -1142,6 +1142,7 @@ h1 {
 }
 
 @media (max-width: 768px) {
+
   /* Tabs should show ONE column only */
   .tab-pane .content,
   .tab-pane .two-column-layout {
@@ -1220,6 +1221,7 @@ h1 {
 }
 
 @media (max-width: 768px) {
+
   .transactions-box,
   .summary-box {
     height: auto;
@@ -1265,6 +1267,7 @@ h1 {
 }
 
 @media (max-width: 480px) {
+
   .grid-header,
   .grid-row {
     grid-template-columns: 1fr 70px 70px;
@@ -1273,6 +1276,7 @@ h1 {
 }
 
 @media (max-width: 768px) {
+
   .grid-header,
   .grid-row {
     grid-template-columns: 1fr 90px 90px;
@@ -1287,4 +1291,34 @@ h1 {
   .popup .row .half {
     width: 100%;
   }
+}
+
+.category-row {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.category-row.active {
+  background: rgba(46, 204, 113, 0.15);
+  font-weight: 600;
+}
+
+.selected-info {
+  text-align: center;
+  margin-top: -130px;
+}
+
+@media (max-width: 768px) {
+  .selected-info {
+    text-align: center;
+    margin-top: -110px;
+  }
+}
+
+.selected-info h2 {
+  margin: 0;
+  font-size: 22px;
 }
