@@ -1,0 +1,50 @@
+<div class="auth-page">
+    <!-- Left Illustration -->
+    <div class="auth-left">
+        <img src="assets/login.png" alt="Finance Illustration" />
+        <h3>Goals made easy</h3>
+        <p>
+            Objectives you set for how you’ll save and spend money.
+            Achieve short and long-term goals effortlessly.
+        </p>
+    </div>
+
+    <!-- Right Form -->
+    <div class="auth-right">
+        <div class="auth-card">
+            <h2 class="logo">Smartbudget<span>💼</span></h2>
+            <p class="subtitle">Welcome back! Please login to your account.</p>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <input type="email" placeholder="Email" formControlName="email" />
+
+                <input type="password" placeholder="Password" formControlName="password" />
+
+                <div class="options">
+                    <label class="remember">
+                        <input type="checkbox" />
+                        <span>Remember me</span>
+                    </label>
+
+                    <a class="forgot" href="#">Forgot Password?</a>
+                </div>
+
+
+                <button type="submit" [disabled]="loginForm.invalid">
+                    LOGIN
+                </button>
+
+                <div class="social-login">
+                    <i class="fab fa-google"></i>
+                    <i class="fab fa-facebook-f"></i>
+                    <i class="fab fa-twitter"></i>
+                </div>
+
+                <p class="link">
+                    Don’t have an account?
+                    <a routerLink="/signup">SIGN UP</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
