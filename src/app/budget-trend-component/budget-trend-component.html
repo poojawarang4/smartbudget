@@ -1,0 +1,37 @@
+<div class="trend-grid">
+  <div class="trend-card" *ngFor="let item of categoryTrends">
+    <h4 class="title">{{ item.category }}</h4>
+
+    <div class="gauge-wrapper" [ngClass]="item.status">
+      <svg viewBox="0 0 200 110" class="gauge-svg">
+        <!-- background arc -->
+        <path
+          d="M10 100 A90 90 0 0 1 190 100"
+          class="arc-bg" />
+
+        <!-- single colored arc -->
+        <path
+          d="M10 100 A90 90 0 0 1 190 100"
+          class="arc-main" />
+
+        <!-- needle -->
+        <line
+          x1="100"
+          y1="100"
+          x2="100"
+          y2="30"
+          class="needle"
+          [attr.transform]="'rotate(' + getNeedleAngle(item.percentage) + ' 100 100)'" />
+
+        <circle cx="100" cy="100" r="6" class="center-dot" />
+      </svg>
+
+      <div class="percent">{{ item.percentage | number:'1.0-0' }}%</div>
+    </div>
+
+    <div class="values">
+      <div>Planned: ₹{{ item.current | number }}</div>
+      <div>Avg (3M): ₹{{ item.average | number }}</div>
+    </div>
+  </div>
+</div>
